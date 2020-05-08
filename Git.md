@@ -288,6 +288,64 @@ MyFile.ext
 my-folder/
 ```
 
+## References
+
+### Types of Referencing
+
+| Type             | Meaning                                               | Example                                     |
+| :--------------- | :---------------------------------------------------- | :------------------------------------------ |
+| The Head         | It is a reference to the currently checked out commit | `HEAD^^`, `HEAD~12`, `HEAD^2`               |
+| Branch Reference | It refers to last commit of that branch               | `master^^^`, `bugFix~1`, `feature-branch^1` |
+| Commit Hash      | The SHA-1 code that is unique to each commit          | `3b49920effa455cbafe8f2d4344e27b9cda09671`  |
+
+### Reference through commit hash
+
+This method is used to uniquely identify a commit. 7 characters are enough for identification.
+
+```zsh
+3b49920effa455cbafe8f2d4344e27b9cda09671  # Full Commit Hash
+3b49920  # Preferred length of Commit Hash
+3b4  # Not preferred but may work to uniquely identify
+```
+
+### Referencing to number of commits behind
+
+The total number of `^` specifies total number of commits behind.
+
+```zsh
+HEAD^^^     # 3 commits behind HEAD
+bugfix^     # 1 commit behind bugfix branch's last commit
+master^^^^^ # 5 commits behind master branch's last commit.
+```
+
+The `~` followed by a number, the number specifies total commits behind.
+
+```zsh
+HEAD~3      # 3 commits behind HEAD
+bugfix~     # 1 commit behind bugfix branch's last commit
+master~5    # 5 commits behind master branch's last commit.
+```
+
+### Referencing to a parent
+
+In case a commit has multiple parents then the number represents the parent.
+
+```zsh
+HEAD^2      # 1 commit behind but 2nd parent
+bugfix^^^1  # 3 commit behind branch bugfix's last commit but 1st parent
+master^^2   # 2 commits behind master branch's last commit but 2nd parent
+```
+
+### Nested
+
+It may contain `~`, any number of `^` or a number
+
+```zsh
+HEAD~1^2        # 1 commit behind, 1 more commit behind and 2nd parent
+bugfix^3~5^1    # 1 commit behind, 3rd parent, five commit behind, 1st parent
+master~1^2~1    # 1 commit behind, 2nd parent, then one commit behind
+```
+
 ## Difference (for difftool replace `diff` to `difftool`)
 
 ### To see differences b/w Modified (red) to Staged (green)
@@ -454,6 +512,14 @@ A use case:
 ```zsh
 git checkout myfeature
 git rebase master
+```
+
+### Rebase branch below another branch
+
+After rebasing you'll be checked out to the above branch.
+
+```zsh
+git rebase {branch-to-appear-below} {branch-to-appear-above}
 ```
 
 ### Stop a rebase
@@ -712,13 +778,11 @@ If not specified, git just uses where you're checked out right now (HEAD).
 - All the changes of commits on top of the current commit are reflected as the uncommited changes.
 - `git reset` updates the index, thus moving the HEAD.
 
-### To move the HEAD to 1 commit below the present HEAD
+### To `reset` to 1 commit below the present HEAD
 
 ```zsh
 git reset HEAD^
 ```
-
-Note: You can also use `HEAD^^^^^` to move five commits below `HEAD`.
 
 or
 
@@ -726,12 +790,10 @@ or
 git reset HEAD~1
 ```
 
-Note: You can also use `HEAD~12` to move twelve commits below `HEAD`.
-
-### To move HEAD to any commit
+### To `reset` to any commit
 
 ```zsh
-git reset {commit-hash}
+git reset {ref}
 ```
 
 ### In case everything is messed up due to `git reset`
@@ -775,7 +837,7 @@ git switch -c {new-branch-name}
 
 ### In case everything is messed up due to `git checkout` and you want to return back to natural form
 
-In that case, either you can undo the operation using `git switch -` or simply checkout to the branch you were working on using `git checkout {branch-name}`. The second method updates the `HEAD` to the referred branch.
+You can undo the operation using `git switch -` or update the branch reference using `git checkout {branch-name}`.
 
 ## Differences between `reset` and `checkout`
 
