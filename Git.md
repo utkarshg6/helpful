@@ -394,6 +394,14 @@ git branch -m {old-name-of-branch} {new-name-of-branch}
 
 Note: Here `-m` flag represents move.
 
+### Move branch to a Particular Commit
+
+```zsh
+git branch -f {branch-name} {commit-hash}
+```
+
+Note: Use it with care because `-f` flag which means forcefully.
+
 ### Deleting the branch
 
 ```zsh
@@ -416,7 +424,7 @@ git merge {branch-to-be-merged}
 git merge {branch-to-be-merged} --no-ff
 ```
 
-Note: This method preserves the Graphline and makes a new commit with commmit message **Merge branch "branch-you-merged"**
+Note: This method preserves the Graphline and adds a new commit with message **Merge branch "branch-you-merged"**
 
 ### Merge a branch in current branch with a commit meesage
 
@@ -489,7 +497,7 @@ Then rebase must be done using this command.
 git pull --rebase origin master
 ```
 
-Note: Basically we are just pulling the changes with `origin/master`, but using the `rebase` method so that the local commits can appear on top of `remote` branch's commits.
+Note: Its pulling the commits of `origin/master` and will put them on top of your local branch's commits.
 
 ## Stashing
 
@@ -594,6 +602,12 @@ Uses of Tags:
 git tag {name-of-tag}
 ```
 
+### Add a Lightweight Tag to a particular commit
+
+```zsh
+git tag {name-of-tag} {commit-hash}
+```
+
 ### Add an Annotated Tag
 
 ```zsh
@@ -652,7 +666,7 @@ Note: If an unpublished commit is included in the tag, then this command will al
 git push {remote} {branch} --tags
 ```
 
-Note: The command `git push {remote} {master}` won't automatically push the tags along with commits. The `--tags` argument is required.
+Note: The command `git push {remote} {master}` won't automatically push the tags along with commits without `--tags` argument.
 
 ### Remove a tag from remote
 
@@ -661,6 +675,29 @@ git push {remote} :{tag-name}
 ```
 
 Note: After using this command the tag will be removed from remote but will remain in the local repository.
+
+## Describe
+
+This command describes where you are relative to the closest tag.
+
+```zsh
+git describe {ref}
+```
+
+Where `{ref}` is anything git can resolve into a commit.
+If not specified, git just uses where you're checked out right now (HEAD).
+
+### The output of the command looks like
+
+```zsh
+{tag}_{numCommits}_g{hash}
+```
+
+| Element    | Meaning                              |
+| :--------- | :----------------------------------- |
+| tag        | Closest ancestor tag in history      |
+| numCommits | Number of commits away that tag is   |
+| hash       | Hash of the commit used as reference |
 
 ## Reflog
 
@@ -711,7 +748,7 @@ Method 2:
 
 - See previous git operations using `git reflog`.
 - Select the state from where everything start going wrong.
-- Either copy the commit hash of that state and use `git reset {commit-hash}` or copy the head state and perform `git reset HEAD@{<num>}`
+- Copy the desired commit hash and use `git reset {commit-hash}` or copy the head state and perform `git reset HEAD@{<num>}`
 
 ## Checkout to a Commit
 
@@ -756,11 +793,53 @@ In that case, either you can undo the operation using `git switch -` or simply c
 3. To revert it we only need to update the `HEAD` to branch reference, we can use `git checkout {branch-name}`.
 4. It is used to create a new branch.
 
+## Revert
+
+- It simply creates a **new commit** that is the opposite of an existing commit.
+- It leaves the files in the same state as if the commit that has been reverted never existed.
+- The new commits can be pushed to `remote` easily thus reverting commits over there also.
+- In `reset` there isn't new commit, it simply resets the `HEAD` and branch reference to a particualar commmit.
+
+### To revert last commit on branch
+
+```zsh
+git revert HEAD
+```
+
+### To revert a specific commit
+
+```zsh
+git revert {bad-commit-hash}
+```
+
+### To revert multiple commits also HEAD
+
+```zsh
+git commit {bad-commit-hash1} {bad-commit-hash2}...{bad-commit-hash-n}
+```
+
+Note: Every bad commit will have a new revert commit and its message.
+
+### To revert a commit and provide message in command line
+
+```zsh
+git revert --no-commit {bad-commit-hash}
+git commit -m "{message}"
+```
+
 ## Cherry-pick
 
-- It is used to merge one commit at a time from another branch into the current branch,
-- It is same as picking a cherry from a table, anyone but one at a time.
+- It is used to merge any number of commits in th working tree into the current branch,
+- It is similar to picking commits like a cherry from the table.
+
+### Cherry-pick only one Commit
 
 ```zsh
 git cherry-pick {commit-hash}
+```
+
+### Cherry-pick multiple Commits
+
+```zsh
+git cherry-pick {commit-hash-1} {commit-hash-1} ...{commit-hash-3}
 ```
