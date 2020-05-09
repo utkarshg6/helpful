@@ -143,7 +143,15 @@ git pull {remote} {branch-name}
 git push {remote} {branch-name}
 ```
 
-Note: In case of creating a PR to upstream, use `git push origin {branch-name}` and then create a PR using GitHub or other Git-based repository hosting platform.
+### Create a PR using branch
+
+First push the branch to origin
+
+```zsh
+git push origin {branch-name}
+```
+
+Then create a PR using GitHub or other Git-based repository hosting platform.
 
 ## Backing out Changes (Oops! I did a mistake.)
 
@@ -773,28 +781,37 @@ If not specified, git just uses where you're checked out right now (HEAD).
 
 ## Reset
 
-- Moves the `HEAD` and the branch reference to a different commit.
-- It diverges the branch into uncommited changes and working branch.
-- All the changes of commits on top of the current commit are reflected as the uncommited changes.
-- `git reset` updates the index, thus moving the HEAD.
+- It resets the changes to the selected commit.
+- By default last commit is used as {ref}, if none provided.
+- Both `HEAD` and branch reference moves to a different commit.
 
-### To `reset` to 1 commit below the present HEAD
+### Soft Reset
 
-```zsh
-git reset HEAD^
-```
+It simply makes all commited changes as uncommited and sometimes results into two branches:
 
-or
-
-```zsh
-git reset HEAD~1
-```
-
-### To `reset` to any commit
+- Main Branch has working directory same as before reset but as uncommited changes.
+- The other unnamed branch contains all the commits that won't be the part anymore.
 
 ```zsh
 git reset {ref}
 ```
+
+For Example, to reset last commit use `git reset HEAD^`.
+
+### Hard Reset
+
+It resets to the particular commit and overwrites all changes in the working directory.
+
+```zsh
+git reset --hard {ref}
+```
+
+### Differences b/w Soft & Hard Reset
+
+| State             | Soft Reset                 | Hard Reset              |
+| :---------------- | :------------------------- | :---------------------- |
+| Staging Area      | Resets to Unstaged         | All changes are removed |
+| Working Directory | No changes will be removed | All changes are removed |
 
 ### In case everything is messed up due to `git reset`
 
