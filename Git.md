@@ -20,6 +20,19 @@ or
 code ~/.gitconfig
 ```
 
+### Define Global user for git
+
+```zsh
+git config --global user.name {username}
+git config --global user.email {email-id}
+```
+
+### Set Default Text Editor
+
+```zsh
+git config --system core.editor {command-that-launches-text-editor}
+```
+
 ### Help command
 
 ```zsh
@@ -30,15 +43,18 @@ Note: In Windows, it will open browser with the command's documentation.
 
 ## Git in a Project
 
-### Initialize `git` (in a folder)
+### Initialize git
 
-This command can be used:
-
-- To create an empty `git` project and start working.
-- To add `git` to an existing project.
+To add `git` to an existing folder
 
 ```zsh
 git init
+```
+
+To create a new `git` Directory
+
+```zsh
+git init {new-directory-name}
 ```
 
 ### List files that `git` is tracking
@@ -244,10 +260,12 @@ This command adds and updates any change to the working directory.
 git log
 ```
 
+Note: `git log -5` will limit to 5 commits.
+
 ### Beautiful Logging
 
 ```zsh
-git log --oneline --graph --decorate
+git log --oneline --graph --decorate --all
 ```
 
 ### Logging Date Wise
@@ -498,6 +516,12 @@ Note: This method preserves the Graphline and adds a new commit with message **M
 git merge -m "{merge-branch-message}"
 ```
 
+### Push all branches to remote
+
+```zsh
+git push {remote} --all
+```
+
 ## Rebase
 
 Rebase adds the commits from other branch on top of your current branch.
@@ -520,14 +544,6 @@ A use case:
 ```zsh
 git checkout myfeature
 git rebase master
-```
-
-### Rebase branch below another branch
-
-After rebasing you'll be checked out to the above branch.
-
-```zsh
-git rebase {branch-to-appear-below} {branch-to-appear-above}
 ```
 
 ### Stop a rebase
@@ -553,6 +569,16 @@ After applying your desired changes.
 ```zsh
 git add .
 git rebase --continue
+```
+
+### Interactive Rebase
+
+### Rebase branch below another branch
+
+After rebasing you'll be checked out to the above branch.
+
+```zsh
+git rebase {branch-to-appear-below} {branch-to-appear-above}
 ```
 
 ### Rebase when branches diverge
@@ -891,10 +917,10 @@ git revert HEAD
 git revert {bad-commit-hash}
 ```
 
-### To revert multiple commits also HEAD
+### To revert multiple commits
 
 ```zsh
-git commit {bad-commit-hash1} {bad-commit-hash2}...{bad-commit-hash-n}
+git revert {bad-commit-hash1} {bad-commit-hash2}...{bad-commit-hash-n}
 ```
 
 Note: Every bad commit will have a new revert commit and its message.
