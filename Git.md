@@ -524,64 +524,48 @@ git push {remote} --all
 
 ## Rebase
 
-Rebase adds the commits from other branch on top of your current branch.
+- Rebase adds the commits from other branch into the current branch and current branch's commits on top of it.
+- The commits of currently active branch will appear on top.
+- The other branch's commits will be added below.
 
-### Simple Rebase
+### Rebasing branches
+
+To rebase a different branch into current branch
 
 ```zsh
-git rebase {branch-name}
+git rebase {other-branch-name}
 ```
 
-Note: The changes will be added on top of the branch you are currently active.
+To rebase one branch into another
 
-A use case:
+```zsh
+git rebase {branch-to-appear-below} {branch-to-appear-above}
+```
+
+Note: After rebasing you'll be checked out to the above branch.
+
+### Use Case 1
 
 - You are working on a feature using branch `myfeature`.
 - A new commit appeared on the `master` branch.
 - You want to add this new commit to your `myfeature` branch.
 - You want your branch commits on top of the `master` branch's new commit.
 
+Either use this command, if you're checked out to `myfeature` branch
+
 ```zsh
-git checkout myfeature
 git rebase master
 ```
 
-### Stop a rebase
+Or you can use this command, you'll be checked out to `myfeature` after that
 
 ```zsh
-git rebase --abort
+git rebase master myfeature
 ```
 
-### What to do when a conflict appears
+### Use Case 2
 
-```zsh
-git rebase {conflicting-branch}
-```
-
-Then solve the rebase similar to the merge conflicts.
-
-```zsh
-git mergetool
-```
-
-After applying your desired changes.
-
-```zsh
-git add .
-git rebase --continue
-```
-
-### Interactive Rebase
-
-### Rebase branch below another branch
-
-After rebasing you'll be checked out to the above branch.
-
-```zsh
-git rebase {branch-to-appear-below} {branch-to-appear-above}
-```
-
-### Rebase when branches diverge
+- Rebase when branches diverge due to fetching.
 
 If you recieve a message after `git fetch`, that
 
@@ -598,6 +582,187 @@ git pull --rebase origin master
 ```
 
 Note: Its pulling the commits of `origin/master` and will put them on top of your local branch's commits.
+
+### Stop a rebase
+
+```zsh
+git rebase --abort
+```
+
+### What to do when a conflict appears
+
+```zsh
+git rebase {conflicting-branch}
+```
+
+Now, the conflicts will appear.
+
+Then solve the rebase similar to the merge conflicts.
+
+```zsh
+git mergetool
+```
+
+After applying your desired changes.
+
+```zsh
+git add .
+git rebase --continue
+```
+
+## Interactive Rebase
+
+- An interactive form of rebase in which you can edit previous commits.
+- It is used for rewriting history.
+
+```zsh
+git rebase -i {ref}
+```
+
+- The reference commit acts as an anchor.
+- Provide the reference to that commit which you don't want to get touched.
+- The commits on top of it becomes open for alteration.
+- A text file will list all the commits in the inverted order of `git log`.
+- It appears inverted because this text file is a script and runs from top to bottom, thus oldest commit appears on top.
+- From here various operations can be performed on the commits.
+
+### Some useful operations
+
+| Name     | Acronym | Action                                   |
+| :------- | :------ | :--------------------------------------- |
+| `pick`   | `p`     | Include this commit for rebasing         |
+| `drop`   | `d`     | Remove this commit for rebasing          |
+| `reword` | `r`     | Change the commit message                |
+| `edit`   | `e`     | Stop at this commit for amending         |
+| `squash` | `s`     | Combine this commit into previous commit |
+
+### Renaming commit messages
+
+- Use `reword` before the commits in the text file, after that save and close it.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+reword 310154e Commit 2
+reword a5f4a0d Commit 3
+```
+
+- New text editor will open for every commit that is asked for `reword`.
+- Now edit the old name to a new one, after that save and close it one by one.
+
+### Editing the previous commits
+
+- For fixing very small changes in a previous commits, `edit` is used.
+- In text editor, add `edit` before the commit in which you want to include your small changes.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+edit 310154e Commit 2
+pick a5f4a0d Commit 3
+```
+
+- The rebase will pause at that commit, now you can make your changes and amend them using this command.
+
+```zsh
+git commit --amend
+```
+
+- It can also be used for renaming commit message through `git commit --amend -m "{new-commit-message}"`.
+- After editing you can resume the rebase using this command.
+
+```zsh
+git rebase --continue
+```
+
+### Reordering Commits
+
+- The reordering can be performed by reordering the lines of individual commit in the text editor.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+pick 310154e Commit 2
+pick a5f4a0d Commit 3
+```
+
+The changes that you make
+
+```zsh
+pick a5f4a0d Commit 3
+pick f7f3f6d Commit 1
+```
+
+- If the commit line won't be included, it will be dropped.
+- After saving the file, the rebase will start recreating this new commits sequence.
+- The conflicts may appear and can be resolved as described above.
+
+### Squashing
+
+- Combining multiple commits or squashing them into one commit.
+- The newer commits are squashed into the oldest commit, in th text editor the oldest commit is listed on top.
+- Use `pick` for the top commit which will be used as the face of other commits.
+- Put `squash` beside all the subsequent commits that you want to combine.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+squash 310154e Commit 2
+squash a5f4a0d Commit 3
+```
+
+- After that save and close it.
+- A new text editor will open which will contain all the commit messages that will be squasheded into one.
+- The heading will contain the commit message of oldest commit.
+- You can insert a new heading to provide a different name to this commit, if not provided the oldest commit name will be used.
+
+### Splitting a Commit
+
+- Splitting a commit undoes a commit and then partially stages and commits as many times as commits you want to end up with.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit before
+edit 310154e Commit middle
+pick a5f4a0d Commit after
+```
+
+The rebasing will have paused on the middle commit. Now perform series of commands to break it into multiple commits.
+
+```zsh
+git reset HEAD^                 # Soft reset HEAD, allowing you to open the commit's contents
+git add file1.ext               # Add file(s) for the first part of the commit
+git commit -m 'middle part one' # A new commit for the first part of the commit
+git add file2.ext               # Add file(s) for the second part of the commit
+git commit -m 'middle part two' # A new commit for the second part of the commit
+git rebase --continue           # Resume rebase
+```
+
+The logs of last four commits.
+
+```zsh
+1c002dd Commit after
+9b29157 Commit middle part two
+35cfb2b Commit middle part one
+f3cc40e Commit before
+```
+
+- The `SHA-1` of all the rebased commits will get changed.
 
 ## Stashing
 
