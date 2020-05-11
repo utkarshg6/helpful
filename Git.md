@@ -1113,3 +1113,184 @@ git cherry-pick {commit-hash}
 ```zsh
 git cherry-pick {commit-hash-1} {commit-hash-1} ...{commit-hash-3}
 ```
+
+## Merging vs Rebasing with Remote
+
+### Merging from remote branches
+
+Pros: The Commit tree is saved.
+
+Cons: The structure is non-linear.
+
+### Rebasing from remote branches
+
+Pros: The structure is linear.
+
+Cons: The Commit tree is not saved.
+
+### An Example
+
+If a commit was created locally on branch `myfeature` and a commit appears on origin's `master` branch.
+
+In Merging, the new commit will be children of new commits of `origin/master` and `myfeature` branches. Thus saving the tree.
+
+In Rebasing, the new commit of `myfeature` will be added on top of the commits of `origin/master`. Thus rewriting history.
+
+## Remote Tracking
+
+- You can make any arbitrary branch track any remote branch. For example, `origin/master`.
+- `git pull` will pull changes form `remote/branch`
+- `git push` will push new commits on this branch to `remote/branch`
+
+### Checkout to a new branch specifying the reference to a remote branch
+
+```zsh
+git checkout -b {totally-not-master} remote/branch
+```
+
+### Specify remote reference to current branch
+
+```zsh
+git branch -u remote/branch
+```
+
+### Specify remote reference to an old branch
+
+```zsh
+git branch -u remote/branch {totally-not-master}
+```
+
+Note: Here `-u` means upstream.
+
+## Advanced Pushing
+
+### Pushing code without specifying anything
+
+- It pushes the code according to it's remote reference.
+- Default remote is set to `origin`.
+
+```zsh
+git push
+```
+
+### Pushing code specifying both remote and branch
+
+```zsh
+git push {remote} {branch}
+```
+
+An example
+
+```zsh
+git push origin master
+```
+
+- Go to the local `master` branch, grab all the commits, and then go to the branch named `master` on `origin`.
+- Place whatever commits are missing on that branch and then tell me when you're done.
+- By specifying master as the "place" argument, we told git where the commits will come from and where the commits will go.
+- Since we specified both arguments, it totally ignores where we are checked out!
+
+### Pushing code specifying remote, source and destination
+
+- It can be done using the colon refspec method.
+
+```zsh
+git push {remote} {source}:{destination}
+```
+
+- Here source is any {ref} like branch reference or commit hash etc. of the local branch.
+- Here destination is remote branch.
+- An example, `git push origin feature-branch^:master`.
+- If the destination branch is not present on remote, git will create a new remote branch.
+
+### Pushing **nothing** to remote
+
+- Warning: It **deletes** the branch.
+
+```zsh
+git push origin :{destination}
+```
+
+- For example, the command `git push origin :bugFix` deletes the branch bugFix from origin and it makes sense.
+
+## Advanced Fetching
+
+### Fetching code without specifying anything
+
+- If git fetch receives no arguments, it just downloads all the commits from the remote onto all the remote branches.
+
+```zsh
+git fetch
+```
+
+### Fetching code specifying both remote and branch
+
+- Downloads all the commits from remote's branch to the local `remote/branch`.
+
+```zsh
+git fetch {remote} {branch}
+```
+
+Note: The code won't be included to local `branch` but to local `remote/branch`. To merge it to local `branch`, use `git pull`.
+
+### Fetching code specifying remote, source and destination
+
+- It is similar to pushing code by providing all the arguments.
+
+```zsh
+git fetch {remote} {source}:{destination}
+```
+
+- Here source is any {ref} like branch reference or commit hash etc. of the remote branch.
+- Here destination is local branch.
+- An example, `git push origin master~1:feature-branch`.
+- If the destination branch is not present on remote, git will create a new local branch.
+
+### Fetching **nothing** to remote
+
+- It creates the new branch.
+
+```zsh
+git fetch origin :{destination}
+```
+
+- For example, the command `git fetch origin :bugFix` creates the branch bugFix **locally**.
+
+## Advanced Pulling
+
+- `pull` is simply two commands in one, `fetch` and `merge`.
+
+### Pulling code specifying both remote and branch
+
+- If pulls code from remote's `branch` and will merge `remote/branch` to checked out branch.
+
+```zsh
+git pull {remote} {branch}
+```
+
+The above command can be written as
+
+```zsh
+git fetch {remote} {branch}
+git merge {branch}
+```
+
+### Pulling code specifying remote, source and destination
+
+- It is similar to fetching code by providing all the arguments and then merging `remote/source` to checked out branch.
+
+```zsh
+git pull {remote} {source}:{destination}
+```
+
+The above command can be written as
+
+```zsh
+git fetch {remote} {source}:{destination}
+git merge {destination}
+```
+
+- Here source is any {ref} like branch reference or commit hash etc. of the remote branch.
+- Here destination is local branch.
+- An example, `git pull origin master:feature-branch`.
+- If the destination branch is not present on remote, git will create a new local branch.
