@@ -20,6 +20,19 @@ or
 code ~/.gitconfig
 ```
 
+### Define Global user for git
+
+```zsh
+git config --global user.name {username}
+git config --global user.email {email-id}
+```
+
+### Set Default Text Editor
+
+```zsh
+git config --system core.editor {command-that-launches-text-editor}
+```
+
 ### Help command
 
 ```zsh
@@ -30,15 +43,18 @@ Note: In Windows, it will open browser with the command's documentation.
 
 ## Git in a Project
 
-### Initialize `git` (in a folder)
+### Initialize git
 
-This command can be used:
-
-- To create an empty `git` project and start working.
-- To add `git` to an existing project.
+To add `git` to an existing folder
 
 ```zsh
 git init
+```
+
+To create a new `git` Directory
+
+```zsh
+git init {new-directory-name}
 ```
 
 ### List files that `git` is tracking
@@ -143,7 +159,15 @@ git pull {remote} {branch-name}
 git push {remote} {branch-name}
 ```
 
-Note: In case of creating a PR to upstream, use `git push origin {branch-name}` and then create a PR using GitHub or other Git-based repository hosting platform.
+### Create a PR using branch
+
+First push the branch to origin
+
+```zsh
+git push origin {branch-name}
+```
+
+Then create a PR using GitHub or other Git-based repository hosting platform.
 
 ## Backing out Changes (Oops! I did a mistake.)
 
@@ -236,10 +260,12 @@ This command adds and updates any change to the working directory.
 git log
 ```
 
+Note: `git log -5` will limit to 5 commits.
+
 ### Beautiful Logging
 
 ```zsh
-git log --oneline --graph --decorate
+git log --oneline --graph --decorate --all
 ```
 
 ### Logging Date Wise
@@ -286,6 +312,64 @@ code .gitignore
 MyFile.ext
 *.ext
 my-folder/
+```
+
+## References
+
+### Types of Referencing
+
+| Type             | Meaning                                               | Example                                     |
+| :--------------- | :---------------------------------------------------- | :------------------------------------------ |
+| The Head         | It is a reference to the currently checked out commit | `HEAD^^`, `HEAD~12`, `HEAD^2`               |
+| Branch Reference | It refers to last commit of that branch               | `master^^^`, `bugFix~1`, `feature-branch^1` |
+| Commit Hash      | The SHA-1 code that is unique to each commit          | `3b49920effa455cbafe8f2d4344e27b9cda09671`  |
+
+### Reference through commit hash
+
+This method is used to uniquely identify a commit. 7 characters are enough for identification.
+
+```zsh
+3b49920effa455cbafe8f2d4344e27b9cda09671  # Full Commit Hash
+3b49920  # Preferred length of Commit Hash
+3b4  # Not preferred but may work to uniquely identify
+```
+
+### Referencing to number of commits behind
+
+The total number of `^` specifies total number of commits behind.
+
+```zsh
+HEAD^^^     # 3 commits behind HEAD
+bugfix^     # 1 commit behind bugfix branch's last commit
+master^^^^^ # 5 commits behind master branch's last commit.
+```
+
+The `~` followed by a number, the number specifies total commits behind.
+
+```zsh
+HEAD~3      # 3 commits behind HEAD
+bugfix~     # 1 commit behind bugfix branch's last commit
+master~5    # 5 commits behind master branch's last commit.
+```
+
+### Referencing to a parent
+
+In case a commit has multiple parents then the number represents the parent.
+
+```zsh
+HEAD^2      # 1 commit behind but 2nd parent
+bugfix^^^1  # 3 commit behind branch bugfix's last commit but 1st parent
+master^^2   # 2 commits behind master branch's last commit but 2nd parent
+```
+
+### Nested
+
+It may contain `~`, any number of `^` or a number
+
+```zsh
+HEAD~1^2        # 1 commit behind, 1 more commit behind and 2nd parent
+bugfix^3~5^1    # 1 commit behind, 3rd parent, five commit behind, 1st parent
+master~1^2~1    # 1 commit behind, 2nd parent, then one commit behind
 ```
 
 ## Difference (for difftool replace `diff` to `difftool`)
@@ -394,6 +478,14 @@ git branch -m {old-name-of-branch} {new-name-of-branch}
 
 Note: Here `-m` flag represents move.
 
+### Move branch to a Particular Commit
+
+```zsh
+git branch -f {branch-name} {commit-hash}
+```
+
+Note: Use it with care because `-f` flag which means forcefully.
+
 ### Deleting the branch
 
 ```zsh
@@ -416,7 +508,7 @@ git merge {branch-to-be-merged}
 git merge {branch-to-be-merged} --no-ff
 ```
 
-Note: This method preserves the Graphline and makes a new commit with commmit message **Merge branch "branch-you-merged"**
+Note: This method preserves the Graphline and adds a new commit with message **Merge branch "branch-you-merged"**
 
 ### Merge a branch in current branch with a commit meesage
 
@@ -424,56 +516,56 @@ Note: This method preserves the Graphline and makes a new commit with commmit me
 git merge -m "{merge-branch-message}"
 ```
 
-## Rebase
-
-Rebase adds the commits from other branch on top of your current branch.
-
-### Simple Rebase
+### Push all branches to remote
 
 ```zsh
-git rebase {branch-name}
+git push {remote} --all
 ```
 
-Note: The changes will be added on top of the branch you are currently active.
+## Rebase
 
-A use case:
+- Rebase adds the commits from other branch into the current branch and current branch's commits on top of it.
+- The commits of currently active branch will appear on top.
+- The other branch's commits will be added below.
+
+### Rebasing branches
+
+To rebase a different branch into current branch
+
+```zsh
+git rebase {other-branch-name}
+```
+
+To rebase one branch into another
+
+```zsh
+git rebase {branch-to-appear-below} {branch-to-appear-above}
+```
+
+Note: After rebasing you'll be checked out to the above branch.
+
+### Use Case 1
 
 - You are working on a feature using branch `myfeature`.
 - A new commit appeared on the `master` branch.
 - You want to add this new commit to your `myfeature` branch.
 - You want your branch commits on top of the `master` branch's new commit.
 
+Either use this command, if you're checked out to `myfeature` branch
+
 ```zsh
-git checkout myfeature
 git rebase master
 ```
 
-### Stop a rebase
+Or you can use this command, you'll be checked out to `myfeature` after that
 
 ```zsh
-git rebase --abort
+git rebase master myfeature
 ```
 
-### What to do when a conflict appears
+### Use Case 2
 
-```zsh
-git rebase {conflicting-branch}
-```
-
-Then solve the rebase similar to the merge conflicts.
-
-```zsh
-git mergetool
-```
-
-After applying your desired changes.
-
-```zsh
-git add .
-git rebase --continue
-```
-
-### Rebase when branches diverge
+- Rebase when branches diverge due to fetching.
 
 If you recieve a message after `git fetch`, that
 
@@ -489,7 +581,188 @@ Then rebase must be done using this command.
 git pull --rebase origin master
 ```
 
-Note: Basically we are just pulling the changes with `origin/master`, but using the `rebase` method so that the local commits can appear on top of `remote` branch's commits.
+Note: Its pulling the commits of `origin/master` and will put them on top of your local branch's commits.
+
+### Stop a rebase
+
+```zsh
+git rebase --abort
+```
+
+### What to do when a conflict appears
+
+```zsh
+git rebase {conflicting-branch}
+```
+
+Now, the conflicts will appear.
+
+Then solve the rebase similar to the merge conflicts.
+
+```zsh
+git mergetool
+```
+
+After applying your desired changes.
+
+```zsh
+git add .
+git rebase --continue
+```
+
+## Interactive Rebase
+
+- An interactive form of rebase in which you can edit previous commits.
+- It is used for rewriting history.
+
+```zsh
+git rebase -i {ref}
+```
+
+- The reference commit acts as an anchor.
+- Provide the reference to that commit which you don't want to get touched.
+- The commits on top of it becomes open for alteration.
+- A text file will list all the commits in the inverted order of `git log`.
+- It appears inverted because this text file is a script and runs from top to bottom, thus oldest commit appears on top.
+- From here various operations can be performed on the commits.
+
+### Some useful operations
+
+| Name     | Acronym | Action                                   |
+| :------- | :------ | :--------------------------------------- |
+| `pick`   | `p`     | Include this commit for rebasing         |
+| `drop`   | `d`     | Remove this commit for rebasing          |
+| `reword` | `r`     | Change the commit message                |
+| `edit`   | `e`     | Stop at this commit for amending         |
+| `squash` | `s`     | Combine this commit into previous commit |
+
+### Renaming commit messages
+
+- Use `reword` before the commits in the text file, after that save and close it.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+reword 310154e Commit 2
+reword a5f4a0d Commit 3
+```
+
+- New text editor will open for every commit that is asked for `reword`.
+- Now edit the old name to a new one, after that save and close it one by one.
+
+### Editing the previous commits
+
+- For fixing very small changes in a previous commits, `edit` is used.
+- In text editor, add `edit` before the commit in which you want to include your small changes.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+edit 310154e Commit 2
+pick a5f4a0d Commit 3
+```
+
+- The rebase will pause at that commit, now you can make your changes and amend them using this command.
+
+```zsh
+git commit --amend
+```
+
+- It can also be used for renaming commit message through `git commit --amend -m "{new-commit-message}"`.
+- After editing you can resume the rebase using this command.
+
+```zsh
+git rebase --continue
+```
+
+### Reordering Commits
+
+- The reordering can be performed by reordering the lines of individual commit in the text editor.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+pick 310154e Commit 2
+pick a5f4a0d Commit 3
+```
+
+The changes that you make
+
+```zsh
+pick a5f4a0d Commit 3
+pick f7f3f6d Commit 1
+```
+
+- If the commit line won't be included, it will be dropped.
+- After saving the file, the rebase will start recreating this new commits sequence.
+- The conflicts may appear and can be resolved as described above.
+
+### Squashing
+
+- Combining multiple commits or squashing them into one commit.
+- The newer commits are squashed into the oldest commit, in th text editor the oldest commit is listed on top.
+- Use `pick` for the top commit which will be used as the face of other commits.
+- Put `squash` beside all the subsequent commits that you want to combine.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit 1
+squash 310154e Commit 2
+squash a5f4a0d Commit 3
+```
+
+- After that save and close it.
+- A new text editor will open which will contain all the commit messages that will be squasheded into one.
+- The heading will contain the commit message of oldest commit.
+- You can insert a new heading to provide a different name to this commit, if not provided the oldest commit name will be used.
+
+### Splitting a Commit
+
+- Splitting a commit undoes a commit and then partially stages and commits as many times as commits you want to end up with.
+
+Let's consider an example
+
+The text-editor opens up displaying following lines
+
+```zsh
+pick f7f3f6d Commit before
+edit 310154e Commit middle
+pick a5f4a0d Commit after
+```
+
+The rebasing will have paused on the middle commit. Now perform series of commands to break it into multiple commits.
+
+```zsh
+git reset HEAD^                 # Soft reset HEAD, allowing you to open the commit's contents
+git add file1.ext               # Add file(s) for the first part of the commit
+git commit -m 'middle part one' # A new commit for the first part of the commit
+git add file2.ext               # Add file(s) for the second part of the commit
+git commit -m 'middle part two' # A new commit for the second part of the commit
+git rebase --continue           # Resume rebase
+```
+
+The logs of last four commits.
+
+```zsh
+1c002dd Commit after
+9b29157 Commit middle part two
+35cfb2b Commit middle part one
+f3cc40e Commit before
+```
+
+- The `SHA-1` of all the rebased commits will get changed.
 
 ## Stashing
 
@@ -594,6 +867,12 @@ Uses of Tags:
 git tag {name-of-tag}
 ```
 
+### Add a Lightweight Tag to a particular commit
+
+```zsh
+git tag {name-of-tag} {commit-hash}
+```
+
 ### Add an Annotated Tag
 
 ```zsh
@@ -652,7 +931,7 @@ Note: If an unpublished commit is included in the tag, then this command will al
 git push {remote} {branch} --tags
 ```
 
-Note: The command `git push {remote} {master}` won't automatically push the tags along with commits. The `--tags` argument is required.
+Note: The command `git push {remote} {master}` won't automatically push the tags along with commits without `--tags` argument.
 
 ### Remove a tag from remote
 
@@ -662,6 +941,29 @@ git push {remote} :{tag-name}
 
 Note: After using this command the tag will be removed from remote but will remain in the local repository.
 
+## Describe
+
+This command describes where you are relative to the closest tag.
+
+```zsh
+git describe {ref}
+```
+
+Where `{ref}` is anything git can resolve into a commit.
+If not specified, git just uses where you're checked out right now (HEAD).
+
+### The output of the command looks like
+
+```zsh
+{tag}_{numCommits}_g{hash}
+```
+
+| Element    | Meaning                              |
+| :--------- | :----------------------------------- |
+| tag        | Closest ancestor tag in history      |
+| numCommits | Number of commits away that tag is   |
+| hash       | Hash of the commit used as reference |
+
 ## Reflog
 
 - It provides the history of all the git operations that had been executed.
@@ -670,32 +972,37 @@ Note: After using this command the tag will be removed from remote but will rema
 
 ## Reset
 
-- Moves the `HEAD` and the branch reference to a different commit.
-- It diverges the branch into uncommited changes and working branch.
-- All the changes of commits on top of the current commit are reflected as the uncommited changes.
-- `git reset` updates the index, thus moving the HEAD.
+- It resets the changes to the selected commit.
+- By default last commit is used as {ref}, if none provided.
+- Both `HEAD` and branch reference moves to a different commit.
 
-### To move the HEAD to 1 commit below the present HEAD
+### Soft Reset
 
-```zsh
-git reset HEAD^
-```
+It simply makes all commited changes as uncommited and sometimes results into two branches:
 
-Note: You can also use `HEAD^^^^^` to move five commits below `HEAD`.
-
-or
+- Main Branch has working directory same as before reset but as uncommited changes.
+- The other unnamed branch contains all the commits that won't be the part anymore.
 
 ```zsh
-git reset HEAD~1
+git reset {ref}
 ```
 
-Note: You can also use `HEAD~12` to move twelve commits below `HEAD`.
+For Example, to reset last commit use `git reset HEAD^`.
 
-### To move HEAD to any commit
+### Hard Reset
+
+It resets to the particular commit and overwrites all changes in the working directory.
 
 ```zsh
-git reset {commit-hash}
+git reset --hard {ref}
 ```
+
+### Differences b/w Soft & Hard Reset
+
+| State             | Soft Reset                 | Hard Reset              |
+| :---------------- | :------------------------- | :---------------------- |
+| Staging Area      | Resets to Unstaged         | All changes are removed |
+| Working Directory | No changes will be removed | All changes are removed |
 
 ### In case everything is messed up due to `git reset`
 
@@ -711,7 +1018,7 @@ Method 2:
 
 - See previous git operations using `git reflog`.
 - Select the state from where everything start going wrong.
-- Either copy the commit hash of that state and use `git reset {commit-hash}` or copy the head state and perform `git reset HEAD@{<num>}`
+- Copy the desired commit hash and use `git reset {commit-hash}` or copy the head state and perform `git reset HEAD@{<num>}`
 
 ## Checkout to a Commit
 
@@ -738,7 +1045,7 @@ git switch -c {new-branch-name}
 
 ### In case everything is messed up due to `git checkout` and you want to return back to natural form
 
-In that case, either you can undo the operation using `git switch -` or simply checkout to the branch you were working on using `git checkout {branch-name}`. The second method updates the `HEAD` to the referred branch.
+You can undo the operation using `git switch -` or update the branch reference using `git checkout {branch-name}`.
 
 ## Differences between `reset` and `checkout`
 
@@ -756,11 +1063,234 @@ In that case, either you can undo the operation using `git switch -` or simply c
 3. To revert it we only need to update the `HEAD` to branch reference, we can use `git checkout {branch-name}`.
 4. It is used to create a new branch.
 
+## Revert
+
+- It simply creates a **new commit** that is the opposite of an existing commit.
+- It leaves the files in the same state as if the commit that has been reverted never existed.
+- The new commits can be pushed to `remote` easily thus reverting commits over there also.
+- In `reset` there isn't new commit, it simply resets the `HEAD` and branch reference to a particualar commmit.
+
+### To revert last commit on branch
+
+```zsh
+git revert HEAD
+```
+
+### To revert a specific commit
+
+```zsh
+git revert {bad-commit-hash}
+```
+
+### To revert multiple commits
+
+```zsh
+git revert {bad-commit-hash1} {bad-commit-hash2}...{bad-commit-hash-n}
+```
+
+Note: Every bad commit will have a new revert commit and its message.
+
+### To revert a commit and provide message in command line
+
+```zsh
+git revert --no-commit {bad-commit-hash}
+git commit -m "{message}"
+```
+
 ## Cherry-pick
 
-- It is used to merge one commit at a time from another branch into the current branch,
-- It is same as picking a cherry from a table, anyone but one at a time.
+- It is used to merge any number of commits in th working tree into the current branch,
+- It is similar to picking commits like a cherry from the table.
+
+### Cherry-pick only one Commit
 
 ```zsh
 git cherry-pick {commit-hash}
 ```
+
+### Cherry-pick multiple Commits
+
+```zsh
+git cherry-pick {commit-hash-1} {commit-hash-1} ...{commit-hash-3}
+```
+
+## Merging vs Rebasing with Remote
+
+### Merging from remote branches
+
+Pros: The Commit tree is saved.
+
+Cons: The structure is non-linear.
+
+### Rebasing from remote branches
+
+Pros: The structure is linear.
+
+Cons: The Commit tree is not saved.
+
+### An Example
+
+If a commit was created locally on branch `myfeature` and a commit appears on origin's `master` branch.
+
+In Merging, the new commit will be children of new commits of `origin/master` and `myfeature` branches. Thus saving the tree.
+
+In Rebasing, the new commit of `myfeature` will be added on top of the commits of `origin/master`. Thus rewriting history.
+
+## Remote Tracking
+
+- You can make any arbitrary branch track any remote branch. For example, `origin/master`.
+- `git pull` will pull changes form `remote/branch`
+- `git push` will push new commits on this branch to `remote/branch`
+
+### Checkout to a new branch specifying the reference to a remote branch
+
+```zsh
+git checkout -b {totally-not-master} remote/branch
+```
+
+### Specify remote reference to current branch
+
+```zsh
+git branch -u remote/branch
+```
+
+### Specify remote reference to an old branch
+
+```zsh
+git branch -u remote/branch {totally-not-master}
+```
+
+Note: Here `-u` means upstream.
+
+## Advanced Pushing
+
+### Pushing code without specifying anything
+
+- It pushes the code according to it's remote reference.
+- Default remote is set to `origin`.
+
+```zsh
+git push
+```
+
+### Pushing code specifying both remote and branch
+
+```zsh
+git push {remote} {branch}
+```
+
+An example
+
+```zsh
+git push origin master
+```
+
+- Go to the local `master` branch, grab all the commits, and then go to the branch named `master` on `origin`.
+- Place whatever commits are missing on that branch and then tell me when you're done.
+- By specifying master as the "place" argument, we told git where the commits will come from and where the commits will go.
+- Since we specified both arguments, it totally ignores where we are checked out!
+
+### Pushing code specifying remote, source and destination
+
+- It can be done using the colon refspec method.
+
+```zsh
+git push {remote} {source}:{destination}
+```
+
+- Here source is any {ref} like branch reference or commit hash etc. of the local branch.
+- Here destination is remote branch.
+- An example, `git push origin feature-branch^:master`.
+- If the destination branch is not present on remote, git will create a new remote branch.
+
+### Pushing **nothing** to remote
+
+- Warning: It **deletes** the branch.
+
+```zsh
+git push origin :{destination}
+```
+
+- For example, the command `git push origin :bugFix` deletes the branch bugFix from origin and it makes sense.
+
+## Advanced Fetching
+
+### Fetching code without specifying anything
+
+- If git fetch receives no arguments, it just downloads all the commits from the remote onto all the remote branches.
+
+```zsh
+git fetch
+```
+
+### Fetching code specifying both remote and branch
+
+- Downloads all the commits from remote's branch to the local `remote/branch`.
+
+```zsh
+git fetch {remote} {branch}
+```
+
+Note: The code won't be included to local `branch` but to local `remote/branch`. To merge it to local `branch`, use `git pull`.
+
+### Fetching code specifying remote, source and destination
+
+- It is similar to pushing code by providing all the arguments.
+
+```zsh
+git fetch {remote} {source}:{destination}
+```
+
+- Here source is any {ref} like branch reference or commit hash etc. of the remote branch.
+- Here destination is local branch.
+- An example, `git push origin master~1:feature-branch`.
+- If the destination branch is not present on remote, git will create a new local branch.
+
+### Fetching **nothing** to remote
+
+- It creates the new branch.
+
+```zsh
+git fetch origin :{destination}
+```
+
+- For example, the command `git fetch origin :bugFix` creates the branch bugFix **locally**.
+
+## Advanced Pulling
+
+- `pull` is simply two commands in one, `fetch` and `merge`.
+
+### Pulling code specifying both remote and branch
+
+- If pulls code from remote's `branch` and will merge `remote/branch` to checked out branch.
+
+```zsh
+git pull {remote} {branch}
+```
+
+The above command can be written as
+
+```zsh
+git fetch {remote} {branch}
+git merge {branch}
+```
+
+### Pulling code specifying remote, source and destination
+
+- It is similar to fetching code by providing all the arguments and then merging `remote/source` to checked out branch.
+
+```zsh
+git pull {remote} {source}:{destination}
+```
+
+The above command can be written as
+
+```zsh
+git fetch {remote} {source}:{destination}
+git merge {destination}
+```
+
+- Here source is any {ref} like branch reference or commit hash etc. of the remote branch.
+- Here destination is local branch.
+- An example, `git pull origin master:feature-branch`.
+- If the destination branch is not present on remote, git will create a new local branch.
