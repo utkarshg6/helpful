@@ -1,4 +1,6 @@
-# Git Course Notes
+# Git Guide
+
+This is a small guide for using Git, if you are in a hurry and you want brief explanation and commands to use. You can also use it as a Git Cheatsheet.
 
 ## Global commands
 
@@ -118,6 +120,15 @@ _A Git repository is the `.git/` folder inside a project._
 ## Syncing Changes
 
 The `remote` can be `origin` or `upstream`
+
+### Cloning
+
+- Creates a local repository of the remote repository.
+- It is preferred to fork a project first and then clone it from `origin`.
+
+```zsh
+git clone {https://github.com/user/repo.git}
+```
 
 ### Listing Remotes
 
@@ -1114,31 +1125,21 @@ git cherry-pick {commit-hash}
 git cherry-pick {commit-hash-1} {commit-hash-1} ...{commit-hash-3}
 ```
 
-## Merging vs Rebasing with Remote
+## Merging vs Rebasing after fetching Remote
 
-### Merging from remote branches
-
-Pros: The Commit tree is saved.
-
-Cons: The structure is non-linear.
-
-### Rebasing from remote branches
-
-Pros: The structure is linear.
-
-Cons: The Commit tree is not saved.
-
-### An Example
-
-If a commit was created locally on branch `myfeature` and a commit appears on origin's `master` branch.
-
-In Merging, the new commit will be children of new commits of `origin/master` and `myfeature` branches. Thus saving the tree.
-
-In Rebasing, the new commit of `myfeature` will be added on top of the commits of `origin/master`. Thus rewriting history.
+| Merging                                                              | Rebasing                                                                           |
+| :------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| After merging the new commit is children of remote and local branch. | After rebasing the local commit appears on top of remote branch's commits.         |
+| Merging results in two parents local and remote.                     | Rebasing results in remote branch as parent one orphan parent i.e. local commit.   |
+| It prevents the confusion of which commit was created first.         | It may create a confusion which commit was created first due to rewritten history. |
+| The Graphline is preserved.                                          | The Graphline changes.                                                             |
+| The tree becomes non-linear.                                         | The tree stays linear.                                                             |
+| It is preferred when you want to preserve complex Graphline.         | It is preferred when you want clean linear Graphline.                              |
 
 ## Remote Tracking
 
-- You can make any arbitrary branch track any remote branch. For example, `origin/master`.
+- You can make any arbitrary local branch track any remote branch.
+- For example you can make branch named `foo` track `origin/master`.
 - `git pull` will pull changes form `remote/branch`
 - `git push` will push new commits on this branch to `remote/branch`
 
@@ -1246,15 +1247,15 @@ git fetch {remote} {source}:{destination}
 - An example, `git push origin master~1:feature-branch`.
 - If the destination branch is not present on remote, git will create a new local branch.
 
-### Fetching **nothing** to remote
+### Fetching **nothing** from remote
 
-- It creates the new branch.
+- It creates a new **local** branch.
 
 ```zsh
 git fetch origin :{destination}
 ```
 
-- For example, the command `git fetch origin :bugFix` creates the branch bugFix **locally**.
+For example, the command `git fetch origin :bugFix` creates the branch `bugFix` **locally**.
 
 ## Advanced Pulling
 
