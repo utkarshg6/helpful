@@ -193,6 +193,8 @@ Then create a PR using GitHub or other Git-based repository hosting platform.
 
 ## Branching
 
+### Basic Operations
+
 List local branches
 
 ```zsh
@@ -241,6 +243,8 @@ Move branch to a Particular Commit
 git branch -f {branch-name} {commit-hash}
 ```
 
+### Deleting Branches
+
 Deleting a local branch
 
 - The `-d` option is an alias for --delete.
@@ -265,7 +269,7 @@ Deleting a remote branch
 git push {remote} --delete {branch-name}
 ```
 
-Push all branches to remote
+### Pushing all branches to remote
 
 ```zsh
 git push {remote} --all
@@ -273,24 +277,21 @@ git push {remote} --all
 
 ## Merging
 
+### Fast Forward Merging
+
 Merge a branch in current branch
 
 ```zsh
 git merge {branch-to-be-merged}
 ```
 
-Merge a branch in current branch with NO FAST FORWARD
+### No Fast Forward Merging
 
-- This method preserves the Graphline and adds a new commit with message **Merge branch "branch-you-merged"**
+- This method adds a new commit with message **Merge branch "branch-you-merged"**.
+- It preserves the Graphline.
 
 ```zsh
 git merge {branch-to-be-merged} --no-ff
-```
-
-Merge a branch in current branch with a commit meesage
-
-```zsh
-git merge -m "{merge-branch-message}"
 ```
 
 ## Referencing
@@ -353,6 +354,8 @@ master~1^2~1    # 1 commit behind, 2nd parent, then one commit behind
 
 ## Difference
 
+### Between Uncommited Changes
+
 - For difftool replace `diff` to `difftool`.
 - Difftools like p4merge shows left and right changes, instead of previous or newer.
 
@@ -380,6 +383,8 @@ To see differences in one file only
 git diff -- {file-name}
 ```
 
+### Between different commits
+
 To see difference b/w two commits
 
 ```zsh
@@ -398,6 +403,8 @@ To see difference b/w last and second last commit
 git diff HEAD HEAD^
 ```
 
+### Between branches
+
 To see difference b/w two Branches
 
 ```zsh
@@ -412,11 +419,15 @@ git diff master origin/master
 
 ## Backing out Changes (Oops! I did a mistake.)
 
+### Unstaging
+
 Unstage a Staged File
 
 ```zsh
 git reset HEAD {staged-file-name}
 ```
+
+### Clear unstaged changes
 
 Remove modifications of Unstaged File
 
@@ -424,9 +435,12 @@ Remove modifications of Unstaged File
 git checkout -- {unstaged-file-name}
 ```
 
-## Renaming and Moving files
+## Renaming, Moving & Deleting
 
 - Use `git mv` over `mv`, this allows `git` to see the changes easily.
+- `mv` can be used for moving or renaming.
+
+### Renaming
 
 Renaming a file
 
@@ -447,6 +461,16 @@ Reversing the Rename operation
 git mv {new-file-name} {old-file-name}
 ```
 
+Tell git that you've renamed a file using explorer
+
+```zsh
+git add -u
+```
+
+By doing so, git understands that file has been renamed instead of deleted and created.
+
+### Moving
+
 Move a file to one level down
 
 ```zsh
@@ -459,15 +483,7 @@ Move a file to one level up
 git mv {file-name} ..
 ```
 
-Tell git that you've renamed a file using explorer
-
-```zsh
-git add -u
-```
-
-By doing so, git understands that file has been renamed instead of deleted and created.
-
-## Deleting a file
+### Deleting
 
 Deleting an untracked file
 
@@ -531,6 +547,29 @@ Show all details of particular commit
 git show {commit-hash}
 ```
 
+## Describe
+
+This command describes where you are relative to the closest tag.
+
+```zsh
+git describe {ref}
+```
+
+Where `{ref}` is anything git can resolve into a commit.
+If not specified, git just uses where you're checked out right now (HEAD).
+
+The output of the command looks like
+
+```zsh
+{tag}_{numCommits}_g{hash}
+```
+
+| Element    | Meaning                              |
+| :--------- | :----------------------------------- |
+| tag        | Closest ancestor tag in history      |
+| numCommits | Number of commits away that tag is   |
+| hash       | Hash of the commit used as reference |
+
 ## Git Alias
 
 Generalised Command for Alias
@@ -557,6 +596,192 @@ The accepted formats for git ignore are
 MyFile.ext
 *.ext
 my-folder/
+```
+
+## Stashing
+
+- Stash saves the uncommited working state as a temporary commit.
+- These changes can be recovered accordingly.
+
+Simple Stash
+
+- While on a branch which has uncommited changes.
+- Stash only stashes the tracked files.
+
+```zsh
+git stash
+```
+
+Stash untracked files also
+
+- Here `-u` is an alias of `--include-untracked`.
+
+```zsh
+git stash -u
+```
+
+Naming a Stash
+
+- You can save the stash with a stash message.
+- It is similar to a commit message.
+
+```zsh
+git stash save "{stash-message}"
+```
+
+List Temporary Stash Commits
+
+```zsh
+git stash list
+```
+
+Return the Stashed Changes
+
+- This command makes stashed changes appear again, ready to be further modified and commited.
+- After running this command tou can make new modifications if necessary and then commit.
+
+```zsh
+git stash apply {stash-code}
+```
+
+Remove Temporary Stash Commits
+
+```zsh
+git stash drop {stash-code}
+```
+
+Remove all Temporary Stash Commits
+
+```zsh
+git stash clear
+```
+
+**Note: If you have a single stash then you don't need to provide stash-code.**
+
+Pop a stash commit
+
+- This command performs `apply` and `drop` in the same order.
+
+```zsh
+git stash pop
+```
+
+Show changes of a Stash
+
+- Perform `git stash list` to see all the stashes.
+- Curly brances are used in this command.
+
+```zsh
+git stash show stash@{<num>}
+```
+
+Migrate the latest stash changes to the new branch
+
+```zsh
+git stash branch {new-branch-name}
+```
+
+## Tagging
+
+Uses of Tags:
+
+- Add identification to a commit.
+- Mark major milestone like a version number. For Example, `v-1.0`
+- Used as a Release on GitHub.
+
+| Type        | Operation                     | Command                    |
+| :---------- | :---------------------------- | :------------------------- |
+| Lightweight | Adds tag name beside a commit | `git tag {name-of-tag}`    |
+| Annotated   | It also contains a message    | `git tag -a {name-of-tag}` |
+
+Add a Lightweight Tag
+
+```zsh
+git tag {name-of-tag}
+```
+
+Add a Lightweight Tag to a particular commit
+
+```zsh
+git tag {name-of-tag} {commit-hash}
+```
+
+Add an Annotated Tag
+
+- This command opens a text editor to add a message.
+
+```zsh
+git tag -a {name-of-annotated-tag}
+```
+
+Add an Annotated Tag with message through command line
+
+```zsh
+git tag -a {name-of-annotated-tag} -m "{tag-message}"
+```
+
+Add an Annotated Tag to a particular commit
+
+```zsh
+git tag -a {name-of-annotated-tag} {commit-hash}
+```
+
+Migrate an Annotated Tag to a particular commit
+
+```zsh
+git tag -a {name-of-annotated-tag} -f {commit-hash}
+```
+
+Show list of tags
+
+```zsh
+git tag --list
+```
+
+Show the commit to which the `tag` points
+
+```zsh
+git show {name-of-tag}
+```
+
+Delete a tag
+
+```zsh
+git tag --delete {name-of-tag}
+```
+
+Pushing the Tag
+
+- If an unpublished commit is included in the tag, then this command will also push the commit.
+
+```zsh
+git push {remote} {name-of-tag}
+```
+
+Push all the tags
+
+```zsh
+git push {remote} {branch} --tags
+```
+
+**Note: The command `git push {remote} {master}` won't automatically push the tags along with commits without `--tags` argument.**
+
+Remove a tag from remote
+
+```zsh
+git push {remote} :{tag-name}
+```
+
+Note: After using this command the tag will be removed from remote but will remain in the local repository.
+
+## Reflog
+
+- It provides the history of all the git operations that had been executed.
+- The topmost row provides the latest git operation performed.
+- It only saves the history of last 60 days.
+
+```zsh
+git reflog
 ```
 
 ## Rebase
@@ -800,211 +1025,6 @@ f3cc40e Commit before
 ```
 
 - The `SHA-1` of all the rebased commits will get changed.
-
-## Stashing
-
-- Stash saves the uncommited working state as a temporary commit.
-- These changes can be recovered accordingly.
-
-Simple Stash
-
-- While on a branch which has uncommited changes.
-- Stash only stashes the tracked files.
-
-```zsh
-git stash
-```
-
-Stash untracked files also
-
-- Here `-u` is an alias of `--include-untracked`.
-
-```zsh
-git stash -u
-```
-
-Naming a Stash
-
-- You can save the stash with a stash message.
-- It is similar to a commit message.
-
-```zsh
-git stash save "{stash-message}"
-```
-
-List Temporary Stash Commits
-
-```zsh
-git stash list
-```
-
-Return the Stashed Changes
-
-- This command makes stashed changes appear again, ready to be further modified and commited.
-- After running this command tou can make new modifications if necessary and then commit.
-
-```zsh
-git stash apply {stash-code}
-```
-
-Remove Temporary Stash Commits
-
-```zsh
-git stash drop {stash-code}
-```
-
-Remove all Temporary Stash Commits
-
-```zsh
-git stash clear
-```
-
-**Note: If you have a single stash then you don't need to provide stash-code.**
-
-Pop a stash commit
-
-- This command performs `apply` and `drop` in the same order.
-
-```zsh
-git stash pop
-```
-
-Show changes of a Stash
-
-- Perform `git stash list` to see all the stashes.
-- Curly brances are used in this command.
-
-```zsh
-git stash show stash@{<num>}
-```
-
-Migrate the latest stash changes to the new branch
-
-```zsh
-git stash branch {new-branch-name}
-```
-
-## Tagging
-
-Uses of Tags:
-
-- Add identification to a commit.
-- Mark major milestone like a version number. For Example, `v-1.0`
-- Used as a Release on GitHub.
-
-| Type        | Operation                     | Command                    |
-| :---------- | :---------------------------- | :------------------------- |
-| Lightweight | Adds tag name beside a commit | `git tag {name-of-tag}`    |
-| Annotated   | It also contains a message    | `git tag -a {name-of-tag}` |
-
-Add a Lightweight Tag
-
-```zsh
-git tag {name-of-tag}
-```
-
-Add a Lightweight Tag to a particular commit
-
-```zsh
-git tag {name-of-tag} {commit-hash}
-```
-
-Add an Annotated Tag
-
-- This command opens a text editor to add a message.
-
-```zsh
-git tag -a {name-of-annotated-tag}
-```
-
-Add an Annotated Tag with message through command line
-
-```zsh
-git tag -a {name-of-annotated-tag} -m "{tag-message}"
-```
-
-Add an Annotated Tag to a particular commit
-
-```zsh
-git tag -a {name-of-annotated-tag} {commit-hash}
-```
-
-Migrate an Annotated Tag to a particular commit
-
-```zsh
-git tag -a {name-of-annotated-tag} -f {commit-hash}
-```
-
-Show list of tags
-
-```zsh
-git tag --list
-```
-
-Show the commit to which the `tag` points
-
-```zsh
-git show {name-of-tag}
-```
-
-Delete a tag
-
-```zsh
-git tag --delete {name-of-tag}
-```
-
-Pushing the Tag
-
-- If an unpublished commit is included in the tag, then this command will also push the commit.
-
-```zsh
-git push {remote} {name-of-tag}
-```
-
-Push all the tags
-
-```zsh
-git push {remote} {branch} --tags
-```
-
-**Note: The command `git push {remote} {master}` won't automatically push the tags along with commits without `--tags` argument.**
-
-Remove a tag from remote
-
-```zsh
-git push {remote} :{tag-name}
-```
-
-Note: After using this command the tag will be removed from remote but will remain in the local repository.
-
-## Describe
-
-This command describes where you are relative to the closest tag.
-
-```zsh
-git describe {ref}
-```
-
-Where `{ref}` is anything git can resolve into a commit.
-If not specified, git just uses where you're checked out right now (HEAD).
-
-The output of the command looks like
-
-```zsh
-{tag}_{numCommits}_g{hash}
-```
-
-| Element    | Meaning                              |
-| :--------- | :----------------------------------- |
-| tag        | Closest ancestor tag in history      |
-| numCommits | Number of commits away that tag is   |
-| hash       | Hash of the commit used as reference |
-
-## Reflog
-
-- It provides the history of all the git operations that had been executed.
-- The topmost row provides the latest git operation performed.
-- It only saves the history of last 60 days.
 
 ## Reset
 
