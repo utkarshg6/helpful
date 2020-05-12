@@ -4,38 +4,38 @@ This is a small guide for using Git, if you are in a hurry and you want brief ex
 
 ## Global commands
 
-### List all files even the hidden ones
+List all files even the hidden ones
 
 ```zsh
 ls -all
 ```
 
-### Edit Global Git Config File
+Edit Global Git Config File
 
 ```zsh
 git config --global -e
 ```
 
-or
+Edit Global Git Config File by specifying address
 
 ```zsh
 code ~/.gitconfig
 ```
 
-### Define Global user for git
+Define Global user for git
 
 ```zsh
 git config --global user.name {username}
 git config --global user.email {email-id}
 ```
 
-### Set Default Text Editor
+Set Default Text Editor
 
 ```zsh
 git config --system core.editor {command-that-launches-text-editor}
 ```
 
-### Help command
+Help command
 
 ```zsh
 git help {any-git-command}
@@ -45,9 +45,7 @@ Note: In Windows, it will open browser with the command's documentation.
 
 ## Git in a Project
 
-### Initialize git
-
-To add `git` to an existing folder
+To initialize `git` to an existing folder
 
 ```zsh
 git init
@@ -59,7 +57,7 @@ To create a new `git` Directory
 git init {new-directory-name}
 ```
 
-### List files that `git` is tracking
+List files that `git` is tracking
 
 ```zsh
 git ls-files
@@ -75,24 +73,26 @@ git ls-files
 
 ## Commiting changes
 
-### Basic Steps to commit changes
+The basic steps to commit changes
 
 ```zsh
 git add {. (recursive) or a file-name}
 git commit -m "{The Commit Message}"
 ```
 
-### If you want to add all files and commit using one command, try
+If you want to add all files and commit using one command
 
 ```zsh
 git commit -am "{The Commit Message}"
 ```
 
-### Change commit message if alerady commited
+Change commit message if alerady commited
 
 ```zsh
 git commit --amend
 ```
+
+Note: You can only commit to local branches and not the remote branches. For them you can only push local commits.
 
 What is this weird looking string beside a commit?
 
@@ -100,6 +100,8 @@ What is this weird looking string beside a commit?
 - It is the unique identifier for each commit.
 
 ## Repositories
+
+### Explanation
 
 **What is a repository?**
 
@@ -109,7 +111,7 @@ _A repository is a central location in which data is stored and managed._
 
 _A Git repository is the `.git/` folder inside a project._
 
-### Different type of repositories while working with `git`
+### Types of repositories
 
 | Name              | Type   | Operation                  |
 | :---------------- | :----- | :------------------------- |
@@ -121,7 +123,7 @@ _A Git repository is the `.git/` folder inside a project._
 
 The `remote` can be `origin` or `upstream`
 
-### Cloning
+### Cloning a repository
 
 - Creates a local repository of the remote repository.
 - It is preferred to fork a project first and then clone it from `origin`.
@@ -130,16 +132,24 @@ The `remote` can be `origin` or `upstream`
 git clone {https://github.com/user/repo.git}
 ```
 
-### Listing Remotes
+### Remotes in the Project
+
+List all the remotes
 
 ```zsh
 git remote -v
 ```
 
-### Add the remote to a project
+Add a new remote to a project
 
 ```zsh
 git remote add {remote} {https://github.com/user/repo.git}
+```
+
+Change the URL of a remote
+
+```zsh
+git remote set-url {remote} {https://github.com/user/repo.git}
 ```
 
 ### Fetch
@@ -157,6 +167,7 @@ Note: The default branch for `fetch` is `origin`, in case not specified.
 ### Pull
 
 - Pulls or downloads the commits from `remote` repository and merges them into your local branch.
+- It is two commands in one `fetch` and `merge`.
 
 ```zsh
 git pull {remote} {branch-name}
@@ -180,152 +191,109 @@ git push origin {branch-name}
 
 Then create a PR using GitHub or other Git-based repository hosting platform.
 
-## Backing out Changes (Oops! I did a mistake.)
+## Branching
 
-### Unstage a Staged File
-
-```zsh
-git reset HEAD {staged-file-name}
-```
-
-### Remove modifications of Unstaged File
+List local branches
 
 ```zsh
-git checkout -- {unstaged-file-name}
+git branch
 ```
 
-## Renaming and Moving files (Prefer `git mv` over `mv`)
+List all branches
 
-### Renaming a file
+- The `-all` option is an alias of `-a`.
 
 ```zsh
-git mv {old-file-name} {new-file-name}
+git branch -a
 ```
 
-### Renaming a file using bash and commiting
+Create a new branch
 
 ```zsh
-mv {old-file-name} {new-file-name}
-git commit -A
+git branch {new-branch-name}
 ```
 
-### Reversing the Rename operation
+Switch branches
 
 ```zsh
-git mv {new-file-name} {old-file-name}
+git checkout {branch-name}
 ```
 
-### Move a file to one level down
+Create new branch and checkout
 
 ```zsh
-git mv {file-name} {folder-name}
+git checkout -b {new-branch-name}
 ```
 
-### Move a file to one level up
+Rename a branch
+
+- Here `-m` flag represents move.
 
 ```zsh
-git mv {file-name} ..
+git branch -m {old-name-of-branch} {new-name-of-branch}
 ```
 
-### Renaming a file using explorer (after renaming)
+Move branch to a Particular Commit
+
+- Use it with care because `-f` flag which means forcefully.
 
 ```zsh
-git add -u
+git branch -f {branch-name} {commit-hash}
 ```
 
-So, that the git understands that file has been renamed instead of deleted and created.
+Deleting a local branch
 
-## Deleting a file
-
-### Deleting an untracked file (`git rm` will fail)
+- The `-d` option is an alias for --delete.
+- It only deletes the branch if it has already been fully merged in its upstream branch.
+- You can not delete the branch you're currently checked out to.
 
 ```zsh
-rm {untracked-file-name}
+git branch -d {branch-name}
 ```
 
-### Reversing the staged delete operation
+Deleting a local branch irresepective of it's merge status
+
+- The `-D` option is an alias for `--delete --force`.
 
 ```zsh
-git reset HEAD {staged-deleted-file}
+git branch -D {branch-name}
 ```
 
-### Reversing the unstaged delete operation
+Deleting a remote branch
 
 ```zsh
-git checkout -- {unstaged-deleted-file}
+git push {remote} --delete {branch-name}
 ```
 
-### Staging changes after deleting through bash
+Push all branches to remote
 
 ```zsh
-git add -A
+git push {remote} --all
 ```
 
-This command adds and updates any change to the working directory.
+## Merging
 
-## Logging or Checking History
-
-### Basic Logging
+Merge a branch in current branch
 
 ```zsh
-git log
+git merge {branch-to-be-merged}
 ```
 
-Note: `git log -5` will limit to 5 commits.
+Merge a branch in current branch with NO FAST FORWARD
 
-### Beautiful Logging
+- This method preserves the Graphline and adds a new commit with message **Merge branch "branch-you-merged"**
 
 ```zsh
-git log --oneline --graph --decorate --all
+git merge {branch-to-be-merged} --no-ff
 ```
 
-### Logging Date Wise
+Merge a branch in current branch with a commit meesage
 
 ```zsh
-git log --since="3 days ago"
+git merge -m "{merge-branch-message}"
 ```
 
-### Following all the changes to one file-name
-
-```zsh
-git log --follow -- {name-of-the-file}
-```
-
-### Show all details of particular commit
-
-```zsh
-git show {commit-hash}
-```
-
-## Git Alias
-
-### Generalised Command for Alias
-
-```zsh
-git config --global alias.{new-command-name} "{previous-command}"
-```
-
-### An Useful Example for Alias
-
-```zsh
-git config --global alias.history "log --all --graph --decorate --oneline"
-```
-
-## Git Ignore (inside a project)
-
-```zsh
-code .gitignore
-```
-
-### Accepted formats
-
-```git
-MyFile.ext
-*.ext
-my-folder/
-```
-
-## References
+## Referencing
 
 ### Types of Referencing
 
@@ -335,7 +303,7 @@ my-folder/
 | Branch Reference | It refers to last commit of that branch               | `master^^^`, `bugFix~1`, `feature-branch^1` |
 | Commit Hash      | The SHA-1 code that is unique to each commit          | `3b49920effa455cbafe8f2d4344e27b9cda09671`  |
 
-### Reference through commit hash
+### Referencing via commit hash
 
 This method is used to uniquely identify a commit. 7 characters are enough for identification.
 
@@ -345,7 +313,7 @@ This method is used to uniquely identify a commit. 7 characters are enough for i
 3b4  # Not preferred but may work to uniquely identify
 ```
 
-### Referencing to number of commits behind
+### Referencing to previous commits
 
 The total number of `^` specifies total number of commits behind.
 
@@ -373,7 +341,7 @@ bugfix^^^1  # 3 commit behind branch bugfix's last commit but 1st parent
 master^^2   # 2 commits behind master branch's last commit but 2nd parent
 ```
 
-### Nested
+### Nested Referencing
 
 It may contain `~`, any number of `^` or a number
 
@@ -383,154 +351,212 @@ bugfix^3~5^1    # 1 commit behind, 3rd parent, five commit behind, 1st parent
 master~1^2~1    # 1 commit behind, 2nd parent, then one commit behind
 ```
 
-## Difference (for difftool replace `diff` to `difftool`)
+## Difference
 
-### To see differences b/w Modified (red) to Staged (green)
+- For difftool replace `diff` to `difftool`.
+- Difftools like p4merge shows left and right changes, instead of previous or newer.
+
+To see differences b/w Modified (red) to Staged (green)
 
 ```zsh
 git diff
 ```
 
-### To see differences b/w Modified (red) to Commited
+To see differences b/w Modified (red) to Commited
 
 ```zsh
 git diff HEAD
 ```
 
-### To see differences b/w Staged (green) to Commited
+To see differences b/w Staged (green) to Commited
 
 ```zsh
 git diff --staged HEAD
 ```
 
-### To see differences in one file only
+To see differences in one file only
 
 ```zsh
 git diff -- {file-name}
 ```
 
-### To see difference b/w two commits
+To see difference b/w two commits
 
 ```zsh
 git diff {new-commit-hash} {old-commit-hash}
 ```
 
-### To see difference b/w two commits using p4merge
+To see difference b/w two commits using p4merge
 
 ```zsh
 git difftool {left-side-commit-hash} {right-side-commit-hash}
 ```
 
-Note: `HEAD` points to the last commit, which can also be used.
-
-### To see difference b/w `HEAD` and `HEAD - 1`
+To see difference b/w last and second last commit
 
 ```zsh
 git diff HEAD HEAD^
 ```
 
-### To see difference b/w two Branches
+To see difference b/w two Branches
 
 ```zsh
 git diff {working-branch} {branch-with changes}
 ```
 
-### To see difference between local and remote `master` branch
+To see difference b/w local and remote `master` branch
 
 ```zsh
 git diff master origin/master
 ```
 
-## Branching
+## Backing out Changes (Oops! I did a mistake.)
 
-### Check Local Branches
+Unstage a Staged File
 
 ```zsh
-git branch
+git reset HEAD {staged-file-name}
 ```
 
-### Check all Branches
+Remove modifications of Unstaged File
 
 ```zsh
-git branch -a
+git checkout -- {unstaged-file-name}
 ```
 
-or
+## Renaming and Moving files
+
+- Use `git mv` over `mv`, this allows `git` to see the changes easily.
+
+Renaming a file
 
 ```zsh
-git branch -all
+git mv {old-file-name} {new-file-name}
 ```
 
-Note: `*` represents current active branch.
-
-### Create new branch
+Renaming a file using bash and commiting
 
 ```zsh
-git branch {new-branch-name}
+mv {old-file-name} {new-file-name}
+git commit -A
 ```
 
-### Switch branches
+Reversing the Rename operation
 
 ```zsh
-git checkout {branch-name}
+git mv {new-file-name} {old-file-name}
 ```
 
-### Create new branch and checkout
+Move a file to one level down
 
 ```zsh
-git checkout -b {new-branch-name}
+git mv {file-name} {folder-name}
 ```
 
-### Rename branch
+Move a file to one level up
 
 ```zsh
-git branch -m {old-name-of-branch} {new-name-of-branch}
+git mv {file-name} ..
 ```
 
-Note: Here `-m` flag represents move.
-
-### Move branch to a Particular Commit
+Tell git that you've renamed a file using explorer
 
 ```zsh
-git branch -f {branch-name} {commit-hash}
+git add -u
 ```
 
-Note: Use it with care because `-f` flag which means forcefully.
+By doing so, git understands that file has been renamed instead of deleted and created.
 
-### Deleting the branch
+## Deleting a file
+
+Deleting an untracked file
+
+- `git rm` will fail because git can't delete a file that it isn't tracking.
 
 ```zsh
-git branch -d {branch-name}
+rm {untracked-file-name}
 ```
 
-Note: You can't delete the branch you're currently checked out to.
-
-## Merging
-
-### Merge a branch in current branch
+Reversing the staged delete operation
 
 ```zsh
-git merge {branch-to-be-merged}
+git reset HEAD {staged-deleted-file}
 ```
 
-### Merge a branch in current branch with NO FAST FORWARD
+Reversing the unstaged delete operation
 
 ```zsh
-git merge {branch-to-be-merged} --no-ff
+git checkout -- {unstaged-deleted-file}
 ```
 
-Note: This method preserves the Graphline and adds a new commit with message **Merge branch "branch-you-merged"**
-
-### Merge a branch in current branch with a commit meesage
+Staging changes after deleting through bash
 
 ```zsh
-git merge -m "{merge-branch-message}"
+git add -A
 ```
 
-### Push all branches to remote
+This command adds and updates any change to the working directory.
+
+## Logging or Checking History
+
+Basic Logging
 
 ```zsh
-git push {remote} --all
+git log
+```
+
+Note: `git log -5` will limit to 5 commits.
+
+Beautiful Logging
+
+```zsh
+git log --oneline --graph --decorate --all
+```
+
+Logging Date Wise
+
+```zsh
+git log --since="3 days ago"
+```
+
+Following all the changes to one file-name
+
+```zsh
+git log --follow -- {name-of-the-file}
+```
+
+Show all details of particular commit
+
+```zsh
+git show {commit-hash}
+```
+
+## Git Alias
+
+Generalised Command for Alias
+
+```zsh
+git config --global alias.{new-command-name} "{previous-command}"
+```
+
+An Useful Example for Alias
+
+```zsh
+git config --global alias.history "log --all --graph --decorate --oneline"
+```
+
+Git Ignore (inside a project)
+
+```zsh
+code .gitignore
+```
+
+The accepted formats for git ignore are
+
+```git
+MyFile.ext
+*.ext
+my-folder/
 ```
 
 ## Rebase
@@ -780,80 +806,79 @@ f3cc40e Commit before
 - Stash saves the uncommited working state as a temporary commit.
 - These changes can be recovered accordingly.
 
-### Simple Stash
+Simple Stash
 
-While on a branch which has uncommited changes.
+- While on a branch which has uncommited changes.
+- Stash only stashes the tracked files.
 
 ```zsh
 git stash
 ```
 
-Note: Stash only stashes the tracked files.
+Stash untracked files also
 
-### Stash untracked files also
+- Here `-u` is an alias of `--include-untracked`.
 
 ```zsh
 git stash -u
 ```
 
-Note: `-u` is same as `--include-untracked`.
+Naming a Stash
 
-### Naming a Stash
-
-You can save the stash with a stash message.
+- You can save the stash with a stash message.
+- It is similar to a commit message.
 
 ```zsh
 git stash save "{stash-message}"
 ```
 
-### List Temporary Stash Commits
+List Temporary Stash Commits
 
 ```zsh
 git stash list
 ```
 
-### Return the Stashed Changes
+Return the Stashed Changes
+
+- This command makes stashed changes appear again, ready to be further modified and commited.
+- After running this command tou can make new modifications if necessary and then commit.
 
 ```zsh
 git stash apply {stash-code}
 ```
 
-Then, the stashed changes will appear, ready to be further modified and commited.
-Make new modifications if necessary and then commit.
-
-### Remove Temporary Stash Commits
+Remove Temporary Stash Commits
 
 ```zsh
 git stash drop {stash-code}
 ```
 
-### Remove all Temporary Stash Commits
+Remove all Temporary Stash Commits
 
 ```zsh
 git stash clear
 ```
 
-Note: In case of single stash we don't need to provide stash-code.
+**Note: If you have a single stash then you don't need to provide stash-code.**
 
-### Pop a stash commit
+Pop a stash commit
 
-This command performs `apply` and `drop` in the same order.
+- This command performs `apply` and `drop` in the same order.
 
 ```zsh
 git stash pop
 ```
 
-### Show changes of a Stash
+Show changes of a Stash
 
-Perform `git stash list` to see all the stashes.
+- Perform `git stash list` to see all the stashes.
+- Curly brances are used in this command.
 
 ```zsh
 git stash show stash@{<num>}
 ```
 
-Note: Curly brances are used in this command.
-
-### Migrate the latest stash changes to the new branch
+Migrate the latest stash changes to the new branch
 
 ```zsh
 git stash branch {new-branch-name}
@@ -872,79 +897,79 @@ Uses of Tags:
 | Lightweight | Adds tag name beside a commit | `git tag {name-of-tag}`    |
 | Annotated   | It also contains a message    | `git tag -a {name-of-tag}` |
 
-### Add a Lightweight Tag
+Add a Lightweight Tag
 
 ```zsh
 git tag {name-of-tag}
 ```
 
-### Add a Lightweight Tag to a particular commit
+Add a Lightweight Tag to a particular commit
 
 ```zsh
 git tag {name-of-tag} {commit-hash}
 ```
 
-### Add an Annotated Tag
+Add an Annotated Tag
+
+- This command opens a text editor to add a message.
 
 ```zsh
 git tag -a {name-of-annotated-tag}
 ```
 
-This opens a text editor to add a message.
-
-### Add an Annotated Tag with message through command line
+Add an Annotated Tag with message through command line
 
 ```zsh
 git tag -a {name-of-annotated-tag} -m "{tag-message}"
 ```
 
-### Add an Annotated Tag to a particular commit
+Add an Annotated Tag to a particular commit
 
 ```zsh
 git tag -a {name-of-annotated-tag} {commit-hash}
 ```
 
-### Migrate an Annotated Tag to a particular commit
+Migrate an Annotated Tag to a particular commit
 
 ```zsh
 git tag -a {name-of-annotated-tag} -f {commit-hash}
 ```
 
-### Show list of tags
+Show list of tags
 
 ```zsh
 git tag --list
 ```
 
-### Show the commit to which the `tag` points
+Show the commit to which the `tag` points
 
 ```zsh
 git show {name-of-tag}
 ```
 
-### Delete a tag
+Delete a tag
 
 ```zsh
 git tag --delete {name-of-tag}
 ```
 
-### Pushing the Tag
+Pushing the Tag
+
+- If an unpublished commit is included in the tag, then this command will also push the commit.
 
 ```zsh
 git push {remote} {name-of-tag}
 ```
 
-Note: If an unpublished commit is included in the tag, then this command will also push the commit.
-
-### Push all the tags
+Push all the tags
 
 ```zsh
 git push {remote} {branch} --tags
 ```
 
-Note: The command `git push {remote} {master}` won't automatically push the tags along with commits without `--tags` argument.
+**Note: The command `git push {remote} {master}` won't automatically push the tags along with commits without `--tags` argument.**
 
-### Remove a tag from remote
+Remove a tag from remote
 
 ```zsh
 git push {remote} :{tag-name}
@@ -963,7 +988,7 @@ git describe {ref}
 Where `{ref}` is anything git can resolve into a commit.
 If not specified, git just uses where you're checked out right now (HEAD).
 
-### The output of the command looks like
+The output of the command looks like
 
 ```zsh
 {tag}_{numCommits}_g{hash}
