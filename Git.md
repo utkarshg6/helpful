@@ -1155,6 +1155,8 @@ You can undo the operation using `git switch -` or update the branch reference u
 
 ## Differences between `reset` and `checkout`
 
+- There is a very good explanation on [stackoverflow.](https://stackoverflow.com/questions/3639342/whats-the-difference-between-git-reset-and-git-checkout)
+
 ### `reset`
 
 1. The `git reset {commit-hash}` moves the `HEAD` as well as the the branch reference to a particualar commit.
@@ -1397,6 +1399,11 @@ git merge {destination}
 - Here destination is local branch.
 - An example, `git pull origin master:feature-branch`.
 - If the destination branch is not present on remote, git will create a new local branch.
+
+## Continue Learning
+
+- [Learn Git Branching JS](https://learngitbranching.js.org/)
+- [Git from the Bottom Up _by john Wiegley_](https://jwiegley.github.io/git-from-the-bottom-up/)
 
 ## The End
 
