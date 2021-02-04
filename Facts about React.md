@@ -20,8 +20,6 @@ const nameOfFunction = () => {
 }
 ```
 
-
-
 ### Map Function
 
 ```javascript

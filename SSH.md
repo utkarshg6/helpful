@@ -8,7 +8,7 @@
 ls -a -l ~/.ssh
 ```
 
-If `id_rsa` and `id_rsa.pub` are present, that means SSH keys are alerady present. If not then only add new SSH Keys.
+If `id_rsa` and `id_rsa.pub` are present, that means SSH keys are already present. If not then only add new SSH Keys.
 
 ### Add New SSH Keys
 
@@ -18,7 +18,7 @@ ssh keygen -t rsa -b 4096 -C "{email-id}@gmail.com"
 
 Press Enter every time.
 
-## Authenticate SSH Connection to Github
+## Authenticate SSH Connection to GitHub
 
 ### Print the Public Key inside terminal
 
@@ -26,7 +26,7 @@ Press Enter every time.
 cat ~/.ssh/id_rsa.pub
 ```
 
-Copy selected text and add it to Github. Follow these steps:
+Copy selected text and add it to GitHub. Follow these steps:
 
 1. Click Profile Icon
 2. Select _Settings_
@@ -55,7 +55,7 @@ cd {my-git-repository}
 eval $(ssh-agent -s)
 ```
 
-Note: Make Sure that the SSH Keys are alerady created.
+Note: Make Sure that the SSH Keys are already created.
 
 ### Add key to the opened repository
 
@@ -77,7 +77,7 @@ ssh -T git@github.com
 
 Then type yes to confirm.
 
-### Push Code to Github
+### Push Code to GitHub
 
 ```zsh
 git push -u origin master

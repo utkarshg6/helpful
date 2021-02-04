@@ -84,3 +84,166 @@ function thaWillAlsoDoRepeatedTask codeThatMayRepeat {
 
 - `assert.ok` only checks the truthiness.
 - function throw helper for try-catch statements in assert modules doesn't work perfectly with the async. Hence, only use `assert()`.
+
+## Mapping
+
+- Keys are not stored.
+
+- Values are not iterable.
+
+- All values exist.
+
+- Mapping is a reference type unlike variables.
+
+- Lookup Process =>
+
+  ‘orange’ – Hashing Function – Index i – Value
+
+## Struct
+
+### Defining 
+
+```
+struct Request {
+    string description;
+    uint value;
+    address recipient;
+    bool complete;
+}
+```
+
+### Instance
+
+```
+Request memory newRequest = Request({
+    description: description,
+    value: value,
+    recipient: recipient,
+    complete: false
+});
+
+requests.push(newRequest);
+```
+
+
+
+## Storage vs. Memory
+
+- Sometimes references to where our contract stores data.
+
+- Sometimes references to where our solidity variables stores values.
+
+  | Storage                                 | Memory                             |
+  | --------------------------------------- | ---------------------------------- |
+  | Holds data between function calls.      | Temporary place to store data.     |
+  | Similar to Computer’s Hard Drive.       | Similar to Computer’s RAM.         |
+  | It points at the same variable.         | It makes the copy of the variable. |
+  | Same as Pass by Reference (Persistent). | Same as Pass by Value (No Change). |
+
+```
+contract Numbers {
+	int[] public numbers;
+	
+	function Numbers() public {
+		numbers.push(10);
+		numbers.push(20);
+		
+		changeArray(numbers);
+	}
+	
+	function changeArray(int[] myArray) private {
+		myArray[0] = 5;
+	}
+}
+```
+
+The output of `numbers[0]` will be `10`, because `myArray` is by default defined as `function changeArray(int[] memory myArray)` . Thus `myArray` will act like a RAM and no updates will get reflected to `numbers` after the completion of the function. In case the user wants the contract to make changes in the `numbers` to be persistent then they should replace `memory` with `storage`.
+
+- An instance of a struct must be used with `memory`.
+
+## Dealing with JavaScript
+
+### Installing Compiler
+
+- Make sure to install the exact version.
+- Consider the below for `pragma soldity ^0.4.17`
+
+```bash
+npm i solc@0.4.17
+```
+
+### Compiling 
+
+```javascript
+const pathToContract = path.resolve(__dirname, 'contractsFolder', 'Contract.sol');
+const source = fs.readFileSync(pathToContract, 'utf8');
+const output = solc.compile(source, 1).contracts;
+```
+
+### Writing JSON
+
+- Below code is useful when multiple contracts are written in one file.
+
+```javascript
+for (let contract in output) {
+    fs.outputJSONSync(
+        path.resolve(buildPath, contract.slice(1, contract.length) + '.json'),
+        output[contract]
+    );
+}
+```
+
+### Importing Contract
+
+```javascript
+const compiledContract = require('../ethereum/build/Contract.json');
+```
+
+### Ganache and Web3
+
+```javascript
+const ganache = require('ganache-cli');
+const Web3 = require('web3');
+
+const web3 = Web3(ganache.provider());
+```
+
+### Deploying using Ganache
+
+```javascript
+let accounts = await web3.eth.getAccounts();
+
+let contract = await web3.eth
+	.Contract(JSON.parse(compiledContract.interface))
+	.deploy({
+		data: compiledContract.bytecode,
+	})
+	.send({
+		from: accounts[0],
+		gas: '1000000'
+	});
+
+// Calling functions that need money (function that creates tx)
+await contract.methods
+	.functionThatNeedsMoney('100') // Money in wei
+	.send({
+		from: accounts[0],
+		gas: '1000000'
+	});
+
+// Calling functions that do NOT need money (view function)
+const data = await contract.methods
+    .viewFunction()
+    .call();
+```
+
+### Receiving deployed Contract
+
+```javascript
+const contract = await new web3.eth
+    .Contract(
+        JSON.parse(compiledContract.interface),
+        contractAddress
+    );
+```
+

@@ -1,6 +1,6 @@
 # Git Guide
 
-This is a guide for using Git. If you are in a hurry and you want brief explanation of the commands you must use, this is a good place for you. You can also use it as a Git Cheatsheet.
+This is a guide for using Git. If you are in a hurry and you want a brief explanation of the commands you must use, this is a good place for you. You can also use it as a Git Cheatsheet.
 
 ## Global commands
 
@@ -26,7 +26,7 @@ Edit Global Git Config File
 git config --global -e
 ```
 
-Edit Global Git Config File by specifying address
+Edit Global Git Config File by specifying the address
 
 ```zsh
 code ~/.gitconfig
@@ -47,13 +47,13 @@ git config --system core.editor {command-that-launches-text-editor}
 
 ### Asking for help
 
-The help command shows the manual of a particualar command
+The help command shows the manual of a particular command
 
 ```zsh
 git help {any-git-command}
 ```
 
-Note: In Windows, it will open browser with the command's documentation.
+Note: In Windows, it will open a new tab in the browser with the command's documentation.
 
 ## Git in a Project
 
@@ -1395,10 +1395,10 @@ git fetch {remote} {source}:{destination}
 git merge {destination}
 ```
 
-- Here source is any {ref} like branch reference or commit hash etc. of the remote branch.
-- Here destination is local branch.
+- Here the source is any {ref} like branch reference or commit hash etc. of the remote branch.
+- Here destination is the local branch.
 - An example, `git pull origin master:feature-branch`.
-- If the destination branch is not present on remote, git will create a new local branch.
+- If the destination branch is not present on the remote, git will create a new local branch.
 
 ## Continue Learning
 
