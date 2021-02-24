@@ -1038,6 +1038,25 @@ squash a5f4a0d Commit 3
 - The heading will contain the commit message of the oldest commit.
 - You can insert a new heading to provide a different name to this commit, if not provided the oldest commit name will be used.
 
+#### Squashing Commits after they've been pushed to remote
+
+- Squash commits locally with
+
+```zsh
+git rebase -i origin/master~4 master
+```
+
+- Then force push with
+
+```zsh
+git push origin +master
+```
+
+| --force                                                                        | +                                                                           |
+| :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| It may overwrite refs other than the current branch.                           | To force a push to only one branch, use a + in front of the refspec to push |
+| It includes local refs that are even strictly behind their remote counterpart. | It only force pushes to the selected branch.                                |
+
 ### Splitting a Commit
 
 - Splitting a commit undoes a commit and then partially stages and commits as many times as commits you want to end up with.
