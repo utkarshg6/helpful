@@ -126,6 +126,14 @@ You can make any changes to the working directory and add it to the last commit.
 git commit --amend
 ```
 
+It is possible to amend uncommitted changes to previous commit using the following command:
+
+```zsh
+git commit --amend --no-edit
+```
+
+This command doesn’t alters the name of the previous commit. Make sure to stage the files before running this command.
+
 ## Repositories
 
 ### Explanation
