@@ -118,20 +118,28 @@ export const fetchUsersSuccess = (users) => {
 
 ```javascript
 // Sync Initial State
-
 const initialState = {
   numOfCakes: 10,
   numOfIceCreams: 20,
 };
 
 // Async Initial State
-
 const initialState = {
   loading: false,
   users: [],
   error: "",
 };
 ```
+
+### Sync vs Async Actions
+
+Sync =>
+
+- As soon as the action was dispatched, the state is updated.
+
+- Example, `buyCake()`, `buyIceCream()`
+
+Async => - We wait for a task to be completed before dispatching our actions. - Example, Asynchronous API Calls to fetch data from an end point and use that data in your application.
 
 ### Reducer Functions (Sync vs Async)
 
@@ -310,7 +318,13 @@ unsubscribe();
 
 ## React Redux
 
-File Structure
+### Add Redux to React project
+
+```zsh
+yarn add react-redux
+```
+
+### Structuring Files
 
 Inside the `src` folder -
 
@@ -319,7 +333,6 @@ src
 ├── App.js
 ├── components
 |  ├── CakeContainer.js
-|  ├── HooksCakeContainer.js
 |  └── IceCreamContainer.js
 ├── redux
 |  ├── cake
@@ -349,21 +362,255 @@ The redux folder has following files and folders
 
 - `store.js` (Creates a Redux Store to be used globally)
 
-Each Reducer will have three files. For E.g. Cake Folder -
+Each Reducer will have three files. For E.g. User Folder -
 
 ```zsh
-├── cake
-|  ├── cakeActions.js (Action Creators are functions returning an object {type: BUY_CAKE})
-|  ├── cakeReducer.js (Reducer Function)
-|  └── cakeTypes.js (Exports type strings as a variable)
+└── user
+   ├── userActions.js (Action Creators)
+   ├── userReducer.js (Reducer Function)
+   └── userTypes.js   (Action Types)
 ```
 
-### Sync vs Async Actions
+#### `userTypes.js`
 
-Sync =>
+- This file only stores the names of Actions as strings.
+- It prevents typos and allows easy way to modify, import and export the Actions.
 
-- As soon as the action was dispatched, the state is updated.
+```javascript
+export const FETCH_USERS_REQUEST = "FETCH_USERS_REQUEST";
+export const FETCH_USERS_SUCCESS = "FETCH_USERS_SUCCESS";
+export const FETCH_USERS_FAILURE = "FETCH_USERS_FAILURE";
+```
 
-- Example, `buyCake()`, `buyIceCream()`
+#### `userActions.js`
 
-Async => - We wait for a task to be completed before dispatching our actions. - Example, Asynchronous API Calls to fetch data from an end point and use that data in your application.
+- This file will store the Action Creators.
+- Action Creators are the functions returning an action as an object.
+- For Async processes like fetching data from api is handled by an action creator which dispatches other action creators.
+
+```javascript
+import {
+  FETCH_USERS_REQUEST,
+  FETCH_USERS_SUCCESS,
+  FETCH_USERS_FAILURE,
+} from "./userTypes";
+import axios from "axios";
+
+export const fetchUsersRequest = () => {
+  return {
+    type: FETCH_USERS_REQUEST,
+  };
+};
+
+export const fetchUsersSuccess = (users) => {
+  return {
+    type: FETCH_USERS_SUCCESS,
+    payload: users,
+  };
+};
+
+export const fetchUsersFailure = (error) => {
+  return {
+    type: FETCH_USERS_FAILURE,
+    payload: error,
+  };
+};
+
+// Async Action Creator
+export const fetchUsers = () => {
+  return (dispatch) => {
+    dispatch(fetchUsersRequest);
+    axios
+      .get("https://jsonplaceholder.typicode.com/users")
+      .then((response) => {
+        const users = response.data;
+        dispatch(fetchUsersSuccess(users));
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        dispatch(fetchUsersFailure(errorMessage));
+      });
+  };
+};
+```
+
+#### `userReducer.js`
+
+- The Reducer file will contain the `initialState` object and the reducer function.
+- This reducer function will then get imported into a `rootreducer.js` file.
+
+```javascript
+import {
+  FETCH_USERS_REQUEST,
+  FETCH_USERS_SUCCESS,
+  FETCH_USERS_FAILURE,
+} from "./userTypes";
+
+const initialState = {
+  loading: false,
+  users: [],
+  error: "",
+};
+
+const userReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case FETCH_USERS_REQUEST:
+      return {
+        ...state,
+        loading: true,
+      };
+    case FETCH_USERS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        users: action.payload,
+        error: "",
+      };
+    case FETCH_USERS_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        users: [],
+        error: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
+export default userReducer;
+```
+
+The other redux files are structured as follows.
+
+```zsh
+├── redux
+|  ├── cake
+|  |  ├── cakeActions.js
+|  |  ├── cakeReducer.js
+|  |  └── cakeTypes.js
+|  ├── iceCream
+|  |  ├── iceCreamActions.js
+|  |  ├── iceCreamReducer.js
+|  |  └── iceCreamTypes.js
+|  |── user
+|  |  ├── userActions.js
+|  |  ├── userReducer.js
+|  |  └── userTypes.js
+|  ├── index.js
+|  ├── rootReducer.js
+|  ├── store.js
+```
+
+- The first three folders contain different reducers and their supporting files.
+- The three other files are used in combining reducers, creating Redux Store and a file used to export action creators.
+
+#### `rootReducer.js`
+
+- This file combines all the Reducers inside a project.
+- In case you have combined multiple reducres, make sure to edit the new name changes in all the Components.
+- Initially when we have one reducer we can receive the state like `state.numOfCakes` but when combining multiple reducers and using a root reducer we retrieve states like `state.cake.numOfCakes`.
+- The syntax will be like `state.{name-of-reducer}.{name-of-state}`.
+
+```javascript
+// Combines all the Reducers
+
+import { combineReducers } from "redux";
+import cakeReducer from "./cake/cakeReducer";
+import iceCreamReducer from "./iceCream/iceCreamReducer";
+import userReducer from "./user/userReducer";
+
+const rootReducer = combineReducers({
+  cake: cakeReducer,
+  iceCream: iceCreamReducer,
+  user: userReducer,
+});
+
+export default rootReducer;
+```
+
+#### `store.js`
+
+- This file creates a Redux Store for your whole project.
+- You can add the middlewares inside this file only.
+- You can also add `composeWithDevTools`, to make Redux Devtools extension work with the Web App.
+
+```javascript
+// Creates a Redux Store to be used globally
+
+import { createStore, applyMiddleware } from "redux";
+import logger from "redux-logger";
+import thunk from "redux-thunk";
+import rootReducer from "./rootReducer";
+import { composeWithDevTools } from "redux-devtools-extension";
+
+const store = createStore(
+  rootReducer,
+  composeWithDevTools(applyMiddleware(logger, thunk))
+);
+
+export default store;
+```
+
+#### `index.js`
+
+- This file is used to export the Action Creators, so that we can import them inside any component.
+- You can use `*` to export all the Action Creators inside the file.
+
+```javascript
+// Only exports the Action Creators
+
+export { buyCake } from "./cake/cakeActions";
+export { buyIceCream } from "./iceCream/iceCreamActions";
+export * from "./user/userActions";
+```
+
+Now, when you're done with all the reducers and creating the store, it's time to integrate it with the React Web App.
+
+```zsh
+React-Redux-Project
+├── public
+|  └── ...
+├── src
+|  ├── components/
+|  |  └── ...
+|  ├── redux/
+|  |  └── ...
+|  ├── App.js
+|  └── index.js
+├── package.json
+└── README.md
+```
+
+We have this global `App.js` file where we import all our components. You can add the Redux store provider here to make the Redux store work anywhere inside the Web App.
+
+#### `App.js`
+
+- The global Project file where all the components are imported.
+
+```javascript
+import React from "react";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import "./App.css";
+
+import CakeContainer from "./components/CakeContainer";
+import ItemContainer from "./components/ItemContainer";
+import UserContainer from "./components/UserContainer";
+
+function App() {
+  // Makes the Redux store available to the connect() calls in the component hierarchy below.
+  return (
+    <Provider store={store}>
+      <div className="App">
+        {/* <CakeContainer /> */}
+        {/* <ItemContainer cake /> */}
+        {/* <ItemContainer /> */}
+        <UserContainer />
+      </div>
+    </Provider>
+  );
+}
+
+export default App;
+```
