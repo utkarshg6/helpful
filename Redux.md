@@ -1,5 +1,8 @@
 # Redux
 
+- A Predictable State Container for JS Apps.
+- Redux is not limited to React and can be used in Vanilla JS projects.
+
 ## Reducer Function
 
 - A reducer is a function which takes two arguments — the current state and an action — and returns a new state.
@@ -322,10 +325,8 @@ yarn add react-redux
 
 ### Structuring Files
 
-Inside the `src` folder -
-
 ```zsh
-D:\Codes\Redux\react-redux-demo
+React-Redux-Project
 ├── public
 |  └── favicon.ico
 ├── src
@@ -358,15 +359,15 @@ D:\Codes\Redux\react-redux-demo
 
 The components directory contains all the React Components.
 
-The redux folder has following files and folders
+The redux folder has following files and folders:
 
-- `cake/`, `iceCream/`, `user/` (Reducer folder)
+  - `cake/`, `iceCream/`, `user/` (Reducer folder)
 
-- `index.js` (Only exports the Action Creators)
+  - `index.js` (Only exports the Action Creators)
 
-- `rootReducer.js` (Combines all the Reducers)
+  - `rootReducer.js` (Combines all the Reducers)
 
-- `store.js` (Creates a Redux Store to be used globally)
+  - `store.js` (Creates a Redux Store to be used globally)
 
 Each Reducer will have three files. For E.g. User Folder -
 
