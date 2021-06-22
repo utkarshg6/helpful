@@ -1,4 +1,4 @@
-# Facts in Solidity
+# Solidity
 
 - Each contract is a class and every node deploys it's instance.
 - The Identical function name of a contract (class) is the constructor.

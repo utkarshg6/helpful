@@ -1,12 +1,6 @@
 # CSS
 
-- Browsers automatically adds some margin and padding to the componenets like <h1> tag. So, it is a good practice to remove it by using the following css.
-
-  ```css
-  
-  ```
-  
-- box-sizing: border-box 
+- Browsers automatically adds some margin and padding to the componenets like the h1 tag. So, it is a good practice to remove it.
 
 - Block Level Elements occupy the entire width that they have available. Also, they create line breaks after and before them.
 

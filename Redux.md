@@ -78,6 +78,7 @@
 ```javascript
 // Basic Action Names
 const BUY_CAKE = "BUY_CAKE";
+const BUY_ICECREAM = "BUY_ICECREAM";
 ```
 
 - You can also save them in a JS file and export them as Named Exports
@@ -361,13 +362,13 @@ The components directory contains all the React Components.
 
 The redux folder has following files and folders:
 
-  - `cake/`, `iceCream/`, `user/` (Reducer folder)
+- `cake/`, `iceCream/`, `user/` (Reducer folder)
 
-  - `index.js` (Only exports the Action Creators)
+- `index.js` (Only exports the Action Creators)
 
-  - `rootReducer.js` (Combines all the Reducers)
+- `rootReducer.js` (Combines all the Reducers)
 
-  - `store.js` (Creates a Redux Store to be used globally)
+- `store.js` (Creates a Redux Store to be used globally)
 
 Each Reducer will have three files. For E.g. User Folder -
 
