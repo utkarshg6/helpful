@@ -2,9 +2,7 @@
 
 ## Reducer Function
 
-- Reducer changes the state on the basis of previous state and an action.
-
-- A reducer is a function which takes two arguments — the current state and an action — and returns based on both arguments a new state.
+- A reducer is a function which takes two arguments — the current state and an action — and returns a new state.
 
 - A Reducer Function is a perfect example of a Pure Function.
 
@@ -114,7 +112,7 @@ export const fetchUsersSuccess = (users) => {
 
 - Reducer function uses two arguments, `state` and `action`. For state argument a default value is provided known as `initialState`.
 
-- It stores the state of application when Web App is initiated.
+- It stores the state of application when Web App is initialized.
 
 ```javascript
 // Sync Initial State
@@ -133,20 +131,11 @@ const initialState = {
 
 ### Sync vs Async Actions
 
-Sync =>
+#### Sync
 
 - As soon as the action was dispatched, the state is updated.
 
 - Example, `buyCake()`, `buyIceCream()`
-
-Async => - We wait for a task to be completed before dispatching our actions. - Example, Asynchronous API Calls to fetch data from an end point and use that data in your application.
-
-### Reducer Functions (Sync vs Async)
-
-- A reducer function takes `state` and `action` as arguments and always returns new state as an object.
-- It can be visualized as `reducer = (state, action) => newState`
-
-- An Example for Sync Reducer
 
 ```javascript
 const reducer = (state = initialState, action) => {
@@ -167,7 +156,10 @@ const reducer = (state = initialState, action) => {
 };
 ```
 
-- An Example for Async Reducer
+#### Async
+
+- We wait for a task to be completed before dispatching our actions.
+- Example, Asynchronous API Calls to fetch data from an end point and use that data in your application.
 
 ```javascript
 const reducer = (state = initialState, action) => {
@@ -215,6 +207,14 @@ const fetchUsers = () => {
   };
 };
 ```
+
+### Middlewares
+
+- Middlewares are like extensions to Redux.
+- Some Popular Middlewares are:
+
+  - `redux-logger` - Used to Log Redux State Updates
+  - `redux-thunk` - Used to Handle Async Operations
 
 ## Redux with Vanilla JS
 
@@ -286,11 +286,7 @@ const store = createStore(rootReducer)
 
 ### Middlewares
 
-- Middlewares are like extensions to Redux.
-- Some Popular Middlewares are:
-
-  - `redux-logger` - Used to Log Redux State Updates
-  - `redux-thunk` - Used to Handle Async Operations
+- Middlewares are added while creating the Redux Store.
 
 ```javascript
 // Import the function from Redux
@@ -329,32 +325,42 @@ yarn add react-redux
 Inside the `src` folder -
 
 ```zsh
-src
-├── App.js
-├── components
-|  ├── CakeContainer.js
-|  └── IceCreamContainer.js
-├── redux
-|  ├── cake
-|  |  ├── cakeActions.js
-|  |  ├── cakeReducer.js
-|  |  └── cakeTypes.js
-|  ├── iceCream
-|  |  ├── iceCreamActions.js
-|  |  ├── iceCreamReducer.js
-|  |  └── iceCreamTypes.js
+D:\Codes\Redux\react-redux-demo
+├── public
+|  └── favicon.ico
+├── src
+|  ├── components
+|  |  ├── CakeContainer.js
+|  |  ├── IceCreamContainer.js
+|  |  └── UserContainer.js
+|  ├── redux
+|  |  ├── cake
+|  |  |  ├── cakeActions.js
+|  |  |  ├── cakeReducer.js
+|  |  |  └── cakeTypes.js
+|  |  ├── iceCream
+|  |  |  ├── iceCreamActions.js
+|  |  |  ├── iceCreamReducer.js
+|  |  |  └── iceCreamTypes.js
+|  |  |── user
+|  |  |  ├── userActions.js
+|  |  |  ├── userReducer.js
+|  |  |  └── userTypes.js
+|  |  ├── rootReducer.js
+|  |  ├── store.js
+|  |  └── index.js
 |  ├── index.js
-|  ├── rootReducer.js
-|  └── store.js
+|  └── App.js
+├── README.md
+├── package.json
+└── yarn.lock
 ```
 
 The components directory contains all the React Components.
 
 The redux folder has following files and folders
 
-- `cake/` (Reducer folder)
-
-- `iceCream/` (Reducer folder)
+- `cake/`, `iceCream/`, `user/` (Reducer folder)
 
 - `index.js` (Only exports the Action Creators)
 
@@ -499,7 +505,7 @@ The other redux files are structured as follows.
 |  |  └── userTypes.js
 |  ├── index.js
 |  ├── rootReducer.js
-|  ├── store.js
+|  └─── store.js
 ```
 
 - The first three folders contain different reducers and their supporting files.
@@ -614,3 +620,199 @@ function App() {
 
 export default App;
 ```
+
+The below code shows how to connect the component with Redux
+
+#### Connect React Components with Redux
+
+- It requires creating two functions `matchStateToProps` and `matchDispatchToProps`.
+
+- We then connect the component with these two functions, so that we can receive the state and dispatch function inside the component as a prop.
+
+```javascript
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import { fetchUsers } from "../redux";
+
+const UserContainer = ({ userData, fetchUsers }) => {
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  return userData.loading ? (
+    <h2>Loading...</h2>
+  ) : userData.error ? (
+    <h2>{userData.error}</h2>
+  ) : (
+    <div>
+      <h2>User List</h2>
+      <div>
+        {userData &&
+          userData.users &&
+          userData.users.map((user) => <p>{user.name}</p>)}
+      </div>
+    </div>
+  );
+};
+
+// Global state created by Redux
+const mapStateToProps = (state) => {
+  return {
+    userData: state.user,
+  };
+};
+
+// Dispatch function by Redux for activating action creators.
+const mapDispatchToProps = (dispatch) => {
+  return {
+    fetchUsers: () => dispatch(fetchUsers()),
+  };
+};
+
+// The connect function that binds everything together
+export default connect(mapStateToProps, mapDispatchToProps)(UserContainer);
+```
+
+We can also send the payload to the Action Creators by asking information from the user.
+
+```javascript
+import { BUY_CAKE } from "./cakeTypes";
+
+// Pass 1 as default to add the ability to dispatch without argument
+export const buyCake = (number = 1) => {
+  return {
+    type: BUY_CAKE,
+    payload: number,
+  };
+};
+```
+
+#### Connect React Component to Redux (Classic)
+
+```javascript
+import React, { useState } from "react";
+import { connect } from "react-redux";
+import { buyCake } from "../redux";
+
+const NewCakeContainer = (props) => {
+  const [number, setNumber] = useState(1);
+
+  return (
+    <div>
+      <h2>Number of Cakes - {props.numOfCakes}</h2>
+      <input
+        type="text"
+        value={number}
+        onChange={(event) => setNumber(parseInt(event.target.value))}
+      />
+      <button onClick={() => props.buyCake(number)}>Buy {number} Cake</button>
+    </div>
+  );
+};
+
+const mapStateToProps = (state) => {
+  return {
+    numOfCakes: state.cake.numOfCakes,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    buyCake: (number) => dispatch(buyCake(number)),
+  };
+};
+
+// connect() connects the React Component to Redux Store
+export default connect(mapStateToProps, mapDispatchToProps)(NewCakeContainer);
+```
+
+#### Connect React Component to Redux (Hooks)
+
+```javascript
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { buyCake } from "../redux";
+
+/*
+    The React Redux Docs say to use React Redux Hooks over the connect(), but there are a few Usage Warnings.
+    Usage Warnings - https://react-redux.js.org/api/hooks#usage-warnings
+*/
+
+const HooksCakeContainer = () => {
+  // Below function works similar to the mapStateToProps() in CakeContainer.js
+  // const numOfCakes = useSelector(state => state.numOfCakes)
+
+  // Multiple Reducers
+  const numOfCakes = useSelector((state) => state.cake.numOfCakes);
+
+  // Dispatch function takes in Action Creator
+  const dispatch = useDispatch();
+
+  return (
+    <div>
+      <h2>Num of Cakes - {numOfCakes}</h2>
+      <button onClick={() => dispatch(buyCake())}>Buy Cake</button>
+    </div>
+  );
+};
+
+export default HooksCakeContainer;
+```
+
+#### Combining two React Components and their Actions
+
+- In the below example we'll connect the Cake and Ice Cream components and actions into one component called Item.
+- We use `ownProps` argument in `mapDispatchToProps` to differentiate between which state to change.
+- The benefit of using this method is that we'll have to create single component instead of creating different components. For example, using item instead of Cake and Ice Cream.
+
+```javascript
+import React from "react";
+import { connect } from "react-redux";
+import { buyCake, buyIceCream } from "../redux";
+
+const ItemContainer = (props) => {
+  return (
+    <div>
+      <h2>Item - {props.item}</h2>
+      <button onClick={props.buyItem}>Buy Items</button>
+    </div>
+  );
+};
+
+const mapStateToProps = (state, ownProps) => {
+  const itemState = ownProps.cake
+    ? state.cake.numOfCakes
+    : state.iceCream.numOfIceCreams;
+
+  return {
+    item: itemState,
+  };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const dispatchFunction = ownProps.cake
+    ? () => dispatch(buyCake())
+    : () => dispatch(buyIceCream());
+
+  return {
+    buyItem: dispatchFunction,
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ItemContainer);
+```
+
+To use it we'll have to pass a prop while adding the Component in `App.js`
+
+```javascript
+// When we want to alter the state of Cake only
+<ItemContainer cake>
+
+// When we want to alter the state of iceCream only
+<ItemContainer iceCream>
+```
+
+## Learn More
+
+- [Redux.js Official Documentation](https://redux.js.org/introduction/getting-started)
+- [React Redux Tutorial - Codevolution](https://www.youtube.com/watch?v=9boMnm5X9ak&list=PLC3y8-rFHvwheJHvseC3I0HuYI2f46oAK)
