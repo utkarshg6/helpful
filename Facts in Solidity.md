@@ -201,12 +201,32 @@ const compiledContract = require('../ethereum/build/Contract.json');
 
 ### Ganache and Web3
 
+#### Initialization
+
 ```javascript
 const ganache = require('ganache-cli');
 const Web3 = require('web3');
 
 const web3 = Web3(ganache.provider());
 ```
+
+#### Get Balance
+
+```javascript
+let balance = await web3.eth.getBalance(accounts[0]);
+```
+
+#### Conversions
+
+```javascript
+// Ether to Wei
+totalWei = web3.utils.toWei('1', 'ether');
+
+// Wei to Ether
+totalEther = web3.utils.fromWei('1000000', 'ether');
+```
+
+
 
 ### Deploying using Ganache
 
