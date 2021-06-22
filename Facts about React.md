@@ -1,35 +1,24 @@
-# Facts about React
+# React
 
-## JavaScript Basics
+## Creating new project
 
-### Function Types
+### Using `npx` to create a new project
 
-#### Legacy Function (ES5)
-
-```javascript
-const nameOfFunction = function (argument) {
-    doSomething();
-}
+```zsh
+npx create-react-app {my-app}
 ```
 
-#### Arrow Function (ES6)
+### Change the Directory
 
-```javascript
-const nameOfFunction = () => {
-    doSomething();
-}
+```zsh
+cd {my-app}
 ```
 
-### Map Function
+### Start the project
 
-```javascript
-array = [1, 2, 3];
-array.map(function (number) {
-    return number * 2;
-})
+```zsh
+npm start
 ```
-
-
 
 ## Components
 
