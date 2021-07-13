@@ -98,7 +98,7 @@
 
 ## Data Types
 
-Basic Data Types
+### Basic Data Types
 
 - Booleans
   - Represented by `bool`, has two values `true` and `false`.
@@ -112,7 +112,56 @@ Basic Data Types
 - Floats	
   - It has `f32` and `f64`, two floating data types for size `32` and `64`.
 
+### Advanced Data Types
 
+- Strings
+
+  - They are of two types:
+
+    - `String` - A smart pointer.
+    - `&str` - Also known as string slice is an immutable reference to a part of string.
+
+  - Defining a String
+
+    ```rust
+    let string = String::new("127.0.0.1:8080"); // It can grow and shrink
+    let string_literal = "1234"; // It's memory is fixed at runtime
+    ```
+
+  - Slicing a string
+
+    ```rust
+    let string = String::from("127.0.0.1:8080");
+    let string_slice = &string[10..14]; // We can also use &string[10..]
+    
+    // We can also use
+    let string_slice = &string[10..]; // Give me everything after 10th byte not character
+    let string_slice = &string[..12]; // Give me everything upto 12th byte not character
+    ```
+
+  - Rust uses utf encoding. So, prefer not to not pass integer values for slicing, as the slice function slices on the basis of bytes instead of characters.
+
+    ```rust
+    let string = String::from("😀😃😄😁");
+    let string_slice = &string[..4];
+    ```
+
+    For this slice instead of returning 4 emojis, the rust will return 1 emoji because it takes 4 bytes to store an emoji.
+
+    ```zsh
+    string_slice = "😀"
+    ```
+
+    
+
+  - Strings in rust can dynamically grow or shrink.
+
+  - We can borrow an entire string by using this syntax
+
+    ```rust
+    let string = String::from("127.0.0.1:8080");
+    let string_borrow: &str = &string;
+    ```
 
 ## Syntax
 
@@ -173,7 +222,7 @@ Basic Data Types
 
 - It’s a way of writing code that writes more code.
 
-- A macro can be called with a variable number of parameters with different types everytime.
+- A macro can be called with a variable number of parameters with different types every time.
 
 - The downside is that Macros definition is more complex than function definitions.
 
@@ -248,6 +297,8 @@ Basic Data Types
 
 - By adding `&` operator before a variable inside functions argument declaration specifies that the particular argument will have it’s reference stored instead of transferring ownership.
 
+- Simply put, if a variable passed directly only with it’s name, it is ownership transfer but if we use `&` or `&mut` along with variable name, then it is called borrowing.
+
   ```rust
   // An example of expecting ownership transfer
   fn some_fn(s : String) {
@@ -256,14 +307,14 @@ Basic Data Types
   
   some_fn(my_string);
   
-  // An example of expecting a reference
+  // An example of expecting a reference (borrowing)
   fn some_fn(s: &String) {
       ...
   }
   
   some_fn(&my_string);
   
-  // An example of expecting a *mutable* reference
+  // An example of expecting a *mutable* reference (borrowing)
   fn some_fn(s: &mut String) {
       ...
   }
@@ -355,4 +406,131 @@ Basic Data Types
   let weight: f32 = input.trim().parse().unwrap();
   ```
 
+
+
+## OOPS
+
+### Instance
+
+- Creating a new instance
+
+  ```rust
+  let server = Server::new("127.0.0.1:8080");
+  ```
+
+- Calling a function of an instance
+
+  ```rust
+  server.run();
+  ```
+
+### Associated Functions
+
+- Associated functions are those functions that we call directly on the struct rather than on an instance of it.
+- We use :: syntax to access the associated functions.
+- The `new` keyword is an example of associated functions.
+
+### The `struct`
+
+- It is like classes in other programming language.
+
+- We only declare the variables and their associated data types inside the block of struct.
+
+- We define the functions related to the struct in a different block with keyword `impl`.
+
+  ```rust
+  struct Server {
+  	// variable_name: data_type
+      addr: String,
+  }
+  ```
+
+### The Struct Functions or Methods
+
+#### Constructor
+
+- Constructors in rust are called `new`
+
+- They are defined under the `impl` block.
+
+  ```rust
+  impl Server {
+      fn new(addr: String) -> Server {
+          Server {
+              addr: addr
+          }
+      }
+      
+      ...
+  }
+  ```
+
+- We can improve the way we write constructors by renaming the struct name with the alias `Self` and passing one word in the case of common variable names.
+
+  ```rust
+  impl Server {
+      // Notice we replaced Server with Self everywhere
+      fn new(addr: String) -> Self {
+          Self {
+              // We only need to pass *addr* as it is common in
+              // constructor argument and in the struct declaration
+              addr
+          }
+      }
+      
+      ...
+  }
+  ```
+
+#### Other Functions
+
+- We can pass `self` as an argument to the functions of an struct.
+
+- The `self` keyword gives the total ownership of the instance of a struct.
+
+- It works similar to the `this` keyword in JavaScript.
+
+- We can also pass `&self` and `&mut self` as an argument to a function.
+
+  ```rust
+  impl Server {
+      fn new(addr: String) -> Self {
+  		...
+      }
   
+      fn run(self) {
+  		...
+      }
+  }
+  ```
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
