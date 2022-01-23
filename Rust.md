@@ -965,7 +965,6 @@ let default_path = env!("CARGO_MANIFEST_DIR");
 rust expand | code -
 ```
 
-
 ### File System operations
 
 - It converts the contents of a file into a string.
@@ -977,9 +976,417 @@ fs::read_to_string(path)
 
 ### Convert result into option
 
-- Ok()  -> Some()
+- Ok() -> Some()
 - Err() -> None
 
 ```
 fs::read_to_string(path).ok()
 ```
+
+### New Learning Concepts
+
+- Assigning a value to a variable is called _binding_.
+- At default, bindings are immutable (not changeable).
+- To make bindings immutable we need to add `mut` keyword before variable name.
+- Rust uses curly braces `({})` to define a scope. A binding defined within a scope can't escape from it.
+
+```rust
+let a = 1;
+dbg!(a); // 1
+{
+    // Here, we re-bind `a` to a new value, which is still immutable.
+    // This technique is called _shadowing_. The new binding is constrained to
+    // this anonymous scope. Outside this scope, the previous binding still
+    // applies.
+    let a = 2;
+    let b = 3;
+    dbg!(a, b); // 2, 3
+}
+// can't use `b` anymore because it is out of scope
+// dbg!(b);
+
+// The shadowed `a` in the inner scope above has fallen out of scope,
+// leaving us with our original binding.
+dbg!(a); // 1
+```
+
+- Outer doc comments are formed with the keyword ///, which acts identically to the // keyword. They apply to the item which follows them, such as a function:
+
+```rust
+/// The `add` function produces the sum of its arguments.
+fn add(x: i32, y: i32) -> i32 { x + y }
+```
+
+- Inner doc comments are formed with the keyword //!, which acts identically to the // keyword. They apply to the item enclosing them, such as a module:
+
+```rust
+mod my_cool_module {
+    //! This module is the bee's knees.
+}
+```
+
+### enums
+
+- Enums, short for enumerations, are a type that limits all possible values of some data.
+- The possible values of an enum are called variants.
+- Enums also work well with match and other control flow operators to help you express intent in your Rust programs.
+
+### structs
+
+- structs are same as classes in python.
+- It is often useful to group a collection of items together, and handle those groups as units. In Rust, we call such a group a struct, and each item one of the struct's fields.
+- A struct defines the general set of fields available, but a particular example of a struct is called an instance.
+- Structs come in three flavors: structs with named fields, tuple structs, and unit structs.
+
+### crates
+
+- In rust, packages are called crates.
+
+### tuples
+
+- Tuples are a lightweight way to group a fixed set of arbitrary types of data together.
+- A tuple doesn't have a particular name; naming a data structure turns it into a struct.
+- A tuple's fields don't have names; they are accessed by means of destructuring or by position.
+
+```rust
+// pointless but legal
+let unit = ();
+// single element
+let single_element = ("note the comma",);
+// two element
+let two_element = (123, "elements can be of differing types");
+
+```
+
+- Access by destructuring
+
+```rust
+let (elem1, _elem2) = two_element;
+assert_eq!(elem1, 123);
+```
+
+- Access by position
+
+```rust
+let notation = single_element.0;
+assert_eq!(notation, "note the comma");
+```
+
+- Tuple Structs
+
+- Like normal structs, these are named types; unlike
+  normal structs, they have anonymous fields.
+- Their syntax is very similar to normal tuple syntax. It is
+  legal to use both destructuring and positional access.
+
+```rust
+struct TupleStruct(u8, i32);
+let my_tuple_struct = TupleStruct(123, -321);
+let neg = my_tuple_struct.1;
+let TupleStruct(byte, _) = my_tuple_struct;
+assert_eq!(neg, -321);
+assert_eq!(byte, 123);
+```
+
+### Field Visibility
+
+- All fields of anonymous tuples are always public.
+- However, fields of tuple structs have individual
+  visibility which defaults to private, just like fields of standard structs.
+- You can make the fields
+  public with the `pub` modifier, just as in a standard struct.
+
+```rust
+// fails due to private fields
+mod tuple {
+  pub struct TupleStruct(u8, i32);
+}
+
+fn main() {
+  let _my_tuple_struct = tuple::TupleStruct(123, -321);
+}
+```
+
+```rust
+// succeeds: fields are public
+mod tuple {
+  pub struct TupleStruct(pub u8, pub i32);
+}
+
+fn main() {
+  let _my_tuple_struct = tuple::TupleStruct(123, -321);
+}
+```
+
+### The Spread Operator (..)
+
+- Creating Instances From Other Instances With Struct Update Syntax.
+- It’s often useful to create a new instance of a struct that uses most of an old instance’s values but changes some. You can do this using _struct update syntax_.
+
+- Initially:
+
+```rust
+    let user2 = User {
+        active: user1.active,
+        username: user1.username,
+        email: String::from("another@example.com"),
+        sign_in_count: user1.sign_in_count,
+    };
+```
+
+- After:
+
+```rust
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1
+    };
+```
+
+### Iterator, Enumerator, Map, Filter
+
+- Rust has the above functions inside the Iterator Trait.
+- It is also possible to use them together.
+
+```rust
+  let iterator = iter.enumerate()
+                     .filter(|(i, val)| i % 2 == 0)
+                     .map(|(i, val)| val)
+
+```
+
+### Adding elements with their frequency to a HashMap using entry
+
+- You can follow this [link](https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.entry).
+
+```rust
+use std::collections::HashMap;
+
+let mut letters = HashMap::new();
+
+for ch in "a short treatise on fungi".chars() {
+    let counter = letters.entry(ch).or_insert(0);
+    *counter += 1;
+}
+
+assert_eq!(letters[&'s'], 2);
+assert_eq!(letters[&'t'], 3);
+assert_eq!(letters[&'u'], 1);
+assert_eq!(letters.get(&'y'), None);
+```
+
+### Attributes
+
+- Attributes are metadata about pieces of Rust code.
+
+```rust
+// Syntax
+// InnerAttribute :
+   # ! [ Attr ]
+
+// OuterAttribute :
+   # [ Attr ]
+```
+
+#### The `derive` attribute
+
+- It is applied to `struct` or `enum`.
+
+## Rust Tests
+
+Fun Fact: In Rust, each test is run in a new thread, and when the main thread sees that a test thread has died, the test is marked as failed.
+
+- A `test` in Rust is a function that’s annotated with the test attribute.
+- The bodies of test functions typically perform these three actions:
+
+  1. Set up any needed data or state.
+  2. Run the code you want to test.
+  3. Assert the results are what you expect.
+
+- Two attributes to keep in mind:
+
+  1. `#[test]` - To change a function into a test function, add `#[test]` on the line before `fn`.
+  2. `should_panic` -
+
+- After adding the attribute `#[test]`, the rust compiler is ready to run `cargo test`.
+
+- When you run the command, behind the scenes Rust builds a test runner binary that runs the functions annotated with the `test` attribute.
+
+- To create a new project with cargo that automatically has tests can be done through:
+
+```zsh
+cargo new <project-name> --lib
+```
+
+- You can write the functions that are not tests inside the tests module, for example a helper function. So, the only way for the Rust to know whether it should run a function as a test is by using the `#[test]` attribute.
+
+- Here is the table for the kind of logging.
+
+| Statistic    | Meaning                                                                      |
+| ------------ | ---------------------------------------------------------------------------- |
+| Passed       | Passing Tests                                                                |
+| Failed       | Failing Tests                                                                |
+| Ignored      | Tests that were ignored due to `#[ignore]` attribute.                        |
+| Measured     | This is for benchmark tests that measure performance. (only in nightly Rust) |
+| Filtered Out |                                                                              |
+
+- The next part, `Doc-tests <project-name>`, is for the reults of any documentation tests.
+- The tests fail when something in the test function panics.
+
+- The macros for assertion.
+
+| Assertion Macro | Use Case                                          | Argument(s)            |
+| --------------- | ------------------------------------------------- | ---------------------- |
+| `assert!()`     | If the condition is true then passes else panics. | Condition              |
+| `panic!()`      | Panics or fails the test with a message if given. | Message                |
+| `assert_eq!()`  | Passes if equal else panics. (`==`)               | (actual, expected)     |
+| `assert_ne!()`  | Passes if not equal else panics. (`!=`)           | (actual, not_expected) |
+
+- In rust the convention doesn't matter, we can either use actual as first argument or as second. it is the programmer's convention.
+
+- In case we are writing the tests in a module inside the same file then we'll need to use the `super::*;` inside the tests module to import all the code of the outside module inside.
+
+```rust
+//Filename: src/lib.rs
+fn do_something() {
+  ...
+}
+
+
+#[cfg(test)]
+mod tests {
+    // The line below will pull all the code of outer module inside.
+    use super::*;
+
+    #[test]
+    fn test_do_something() {
+      ...
+    }
+}
+```
+
+- For structs and enums that you define, you’ll need to implement `PartialEq` to assert that values of those types are equal or not equal.
+
+```rust
+#[derive(PartialEq, Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // This test will only work if we'll add #[derive(PartialEq)] to the struct or enum.
+    #[test]
+    fn rectangle_is_of_same_size() {
+        let rectangle1 = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let rectangle2 = Rectangle {
+            width: 8,
+            height: 7,
+        };
+
+        assert_eq!(rectangle1, rectangle2);
+    }
+}
+```
+
+- You’ll need to implement `Debug` to the struct or enum if you want to see the logs that left != right.
+
+```rust
+---- tests::rectangle_is_of_same_size stdout ----
+thread 'tests::rectangle_is_of_same_size' panicked at 'assertion failed: `(left == right)`
+  left: `Rectangle { width: 8, height: 7 }`,
+ right: `Rectangle { width: 8, height: 8 }`', src/lib.rs:56:9
+```
+
+- The `assert!()` macro also allows the message to show in case the test fails.
+
+```rust
+assert!(
+  result.contains("something"),
+  "The result doesn't contain something. This was the actual result: {}",
+  result
+)
+```
+
+- There is an attribute named `#[should_panic]`, that you can write before any test function to declare that if this function panics then it is working correctly.
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+```
+
+- This is the note that appears in case the function doesn't panics.
+
+```zsh
+note: test did not panic as expected
+```
+
+- To make the `![should_panic]` attribute more precise we can add the `expected` parameter and pass a string to it such that the string is a substring of the relevant panic message.
+
+```rust
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 {
+            panic!(
+                "Guess value must be greater than or equal to 1, got {}.",
+                value
+            );
+        } else if value > 100 {
+            panic!(
+                "Guess value must be less than or equal to 100, got {}.",
+                value
+            );
+        }
+
+        Guess { value }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // The below test only passes if both the two conditions satisfies:
+    // 1. Code should panic
+    // 2. The string passed in expected parameter is a substring of the panic message.
+    #[test]
+    #[should_panic(expected = "Guess value must be less than or equal to 100")]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+}
+```
+
+- There is also an alternative approach possible to use `Ok()` and `Err()` inside a test.
+
+```rust
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() -> Result<(), String> {
+        if 2 + 2 == 4 {
+            Ok(())
+        } else {
+            Err(String::from("two plus two does not equal four"))
+        }
+    }
+}
+```
+
+- Pros: The only upside of writing tests such that they return a `Result<T, E>` enables you to use the question mark (`?`) operator in the body of tests, which can be a convenient way to write tests that should fail if any operation within them returns an Err variant.
+
+- Cons: If we write tests in above manner than we cannot use `#[should_panic]` attribute because we can use `Err()`.
