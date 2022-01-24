@@ -267,3 +267,10 @@ const contract = await new web3.eth
     );
 ```
 
+### Useful Commands
+
+- To connect contracts stored in pc to remix.
+
+```bash
+remixd -s <directory-name> --remix-ide https://remix.ethereum.org
+```
