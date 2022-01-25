@@ -427,7 +427,7 @@ These are the crucial parts of the Memory Management:
 
   ```rust
   struct Server {
-  	// variable_name: data_type
+   // variable_name: data_type
       addr: String,
   }
   ```
@@ -482,11 +482,11 @@ These are the crucial parts of the Memory Management:
   ```rust
   impl Server {
       fn new(addr: String) -> Self {
-  		...
+    ...
       }
 
       fn run(self) {
-  		...
+    ...
       }
   }
   ```
@@ -505,7 +505,7 @@ enum Method {
     DELETE,
     POST,
     PUT,
-	...
+ ...
 }
 ```
 
@@ -602,18 +602,11 @@ super::method::Method
 
 ## Loops
 
-- Infinite Loop
+- Rust offers `loop` which is similar to while loop in python.
 
 ```rust
-// Classical Method
-
-while True {
-...
-}
-
-// In Rust
 loop {
-...
+    // do something iteratively
 }
 ```
 
@@ -621,9 +614,25 @@ loop {
 
 ```rust
 'outer:loop {
-	loop {
-		break 'outer;
-	}
+ loop {
+  break 'outer;
+ }
+}
+```
+
+- It also offers traditional for loop.
+
+```rust
+for c in name.chars() {
+    // c variable stores one charater per iteration
+}
+```
+
+- Enumeration
+
+```rust
+for (i, v) in request.chars().enumerate() {
+    // i is index, v is variable
 }
 ```
 
@@ -667,7 +676,7 @@ let a = [1, 2, 3, 4];
 // Method 1
 fn arr(a: [u8; 5]) {
     // We need to provide the size beforehand
-	// Rust can't handle arbitrary size at runtime
+ // Rust can't handle arbitrary size at runtime
 }
 
 arr(a)
@@ -675,7 +684,7 @@ arr(a)
 // Method 2
 fn arr(a: &[u8]) {
     // We now need to prevent the size,
-	// since rust knows the size of pointers
+ // since rust knows the size of pointers
 }
 
 arr(&a)
@@ -687,37 +696,37 @@ arr(&a)
 
 - Traverse to `debug` folder
 
-  ```
+  ```zsh
   cd target/debug
   ```
 
 - Run debugger
 
-  ```
+  ```zsh
   gdb server
   ```
 
 - Display the code along with line numbers
 
-  ```
+  ```zsh
   list
   ```
 
 - Set Breakpoints (`b filename:line`)
 
-  ```
+  ```zsh
   b main.rs:7
   ```
 
 - Running with breakpoints
 
-  ```
+  ```zsh
   r
   ```
 
 - Getting local variables
 
-  ```
+  ```zsh
   info locals
   ```
 
@@ -761,10 +770,10 @@ use std::convert::TryFrom;
 impl TryFrom<&[u8]> for Request {
     // &[u8] is a byte slice
     // for keyword is used to extend the Request data type
-	// This code block coverts byte array into Request.
+ // This code block coverts byte array into Request.
 
     // If we implement TryFrom, TryInto automatically gets implemented.
-	// ONLY RUST FEATURE (ORF)
+ // ONLY RUST FEATURE (ORF)
     type Error = String;
 
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
@@ -822,33 +831,7 @@ str::from_utf8(buf).or(Err(ParseError::InvalidEncoding))?;
 
 - It is similar to `or` function. The difference is that if the output is not an error, it will first unwrap then wrap again inside a result, which has ok and error.
 
-### Loops
-
-- Rust offers `loop` which, is similar to while loop in python.
-
-```rust
-loop {
-    // do something iteratively
-}
-```
-
-- It also offers traditional for loop.
-
-```rust
-for c in name.chars() {
-    // c variable stores one charater per iteration
-}
-```
-
-- Enumeration
-
-```rust
-for (i, v) in request.chars().enumerate() {
-    // i is index, v is variable
-}
-```
-
-### The ` if let` method
+### The `if let` method
 
 ```rust
 // Method 1
@@ -979,7 +962,7 @@ fs::read_to_string(path)
 - Ok() -> Some()
 - Err() -> None
 
-```
+```rust
 fs::read_to_string(path).ok()
 ```
 
