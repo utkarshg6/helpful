@@ -20,8 +20,6 @@
 | `pure`     | Neither read nor modify contract's data.      |
 | `payable`  | When someone sends ether.                     |
 
-
-
 ## Web3 with Contracts
 
 |   Goal    |  ABI  | Bytecode | Address |
@@ -67,20 +65,20 @@
 
 ```sol
 modifier codeThatMayRepeat {
-	doThis();
-	_;
+ doThis();
+ _;
 }
 
 function thaWillDoRepeatedTask codeThatMayRepeat {
-	doSomething();
+ doSomething();
 }
 
 function thaWillAlsoDoRepeatedTask codeThatMayRepeat {
-	doSomethingToo();
+ doSomethingToo();
 }
 ```
 
- ## Testing in JS with Mocha
+## Testing in JS with Mocha
 
 - `assert.ok` only checks the truthiness.
 - function throw helper for try-catch statements in assert modules doesn't work perfectly with the async. Hence, only use `assert()`.
@@ -101,9 +99,9 @@ function thaWillAlsoDoRepeatedTask codeThatMayRepeat {
 
 ## Struct
 
-### Defining 
+### Defining
 
-```
+```sol
 struct Request {
     string description;
     uint value;
@@ -114,7 +112,7 @@ struct Request {
 
 ### Instance
 
-```
+```sol
 Request memory newRequest = Request({
     description: description,
     value: value,
@@ -124,8 +122,6 @@ Request memory newRequest = Request({
 
 requests.push(newRequest);
 ```
-
-
 
 ## Storage vs. Memory
 
@@ -140,20 +136,20 @@ requests.push(newRequest);
   | It points at the same variable.         | It makes the copy of the variable. |
   | Same as Pass by Reference (Persistent). | Same as Pass by Value (No Change). |
 
-```
+```sol
 contract Numbers {
-	int[] public numbers;
-	
-	function Numbers() public {
-		numbers.push(10);
-		numbers.push(20);
-		
-		changeArray(numbers);
-	}
-	
-	function changeArray(int[] myArray) private {
-		myArray[0] = 5;
-	}
+ int[] public numbers;
+ 
+ function Numbers() public {
+  numbers.push(10);
+  numbers.push(20);
+  
+  changeArray(numbers);
+ }
+ 
+ function changeArray(int[] myArray) private {
+  myArray[0] = 5;
+ }
 }
 ```
 
@@ -172,7 +168,7 @@ The output of `numbers[0]` will be `10`, because `myArray` is by default defined
 npm i solc@0.4.17
 ```
 
-### Compiling 
+### Compiling
 
 ```javascript
 const pathToContract = path.resolve(__dirname, 'contractsFolder', 'Contract.sol');
@@ -226,30 +222,28 @@ totalWei = web3.utils.toWei('1', 'ether');
 totalEther = web3.utils.fromWei('1000000', 'ether');
 ```
 
-
-
 ### Deploying using Ganache
 
 ```javascript
 let accounts = await web3.eth.getAccounts();
 
 let contract = await web3.eth
-	.Contract(JSON.parse(compiledContract.interface))
-	.deploy({
-		data: compiledContract.bytecode,
-	})
-	.send({
-		from: accounts[0],
-		gas: '1000000'
-	});
+ .Contract(JSON.parse(compiledContract.interface))
+ .deploy({
+  data: compiledContract.bytecode,
+ })
+ .send({
+  from: accounts[0],
+  gas: '1000000'
+ });
 
 // Calling functions that need money (function that creates tx)
 await contract.methods
-	.functionThatNeedsMoney('100') // Money in wei
-	.send({
-		from: accounts[0],
-		gas: '1000000'
-	});
+ .functionThatNeedsMoney('100') // Money in wei
+ .send({
+  from: accounts[0],
+  gas: '1000000'
+ });
 
 // Calling functions that do NOT need money (view function)
 const data = await contract.methods
