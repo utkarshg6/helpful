@@ -1202,6 +1202,7 @@ Fun Fact: In Rust, each test is run in a new thread, and when the main thread se
 - When you run the command, behind the scenes Rust builds a test runner binary that runs the functions annotated with the `test` attribute.
 
 - You can write the functions that are not tests inside the tests module, for example a helper function. So, the only way for the Rust to know whether a function is a test function is through the `#[test]` attribute.
+- The tests fail when something in the test function panics.
 
 - Here is the table for the logging statistics:
 
@@ -1212,9 +1213,6 @@ Fun Fact: In Rust, each test is run in a new thread, and when the main thread se
   | Ignored      | Tests that were ignored due to `#[ignore]` attribute.                        |
   | Measured     | This is for benchmark tests that measure performance. (only in nightly Rust) |
   | Filtered Out | While running specific tests, the left out tests are called `filtered`.      |
-
-- The next part, `Doc-tests <project-name>`, is for the reults of any documentation tests.
-- The tests fail when something in the test function panics.
 
 - Here is the table for the macros you mauy use for assertion:
 
@@ -1465,9 +1463,9 @@ mod tests {
 | Lives inside `src` directory inside each module                | Lives in `tests` directory right outside `src` directory        |
 | Module named tests inside each module with `#[cfg(test)]`      | Different files inside `tests` directory without `#[cfg(test)]` |
 
-#### The Tests Module and #[cfg(test)]
+#### Unit Tests
 
-- This annotation tells Rust to only run this module on `cargo test`, not when you run `cargo build`.
+- This annotation `#[cfg(test)]` tells Rust to only run this module on `cargo test`, not when you run `cargo build`.
 - Thus, the functions following this annotation are never part of compiled result, hereby saving some space.
 - Only used for unit tests, since integration tests are different directory they don't need to use it.
 - An example worth noting:
