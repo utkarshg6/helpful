@@ -1571,3 +1571,30 @@ mod tests {
   1. Unit Tests
   2. Integration Tests
   3. Doc Tests
+
+## Editions in Rust
+
+- When you use, `cargo new`, Rust adds a bit of metadata to your `cargo.toml` about edition under `[package]`.
+
+  ```toml
+  edition = "2021"
+  ```
+
+- Here are the details about editions:
+
+  | Edition | Description                                                     |
+  | ------- | --------------------------------------------------------------- |
+  | 2015    | If no version is specified, your project is using this version. |
+  | 2018    | The Rust Book is written using this version.                    |
+  | 2021    | This is the latest release at the moment.                       |
+
+- Rust has a 6-week release cycle.
+- Rust releases small changes very often rather than big changes less often.
+- Every 2-3 years, Rust team releases a new edition.
+- Rust supports backward compatibility, it means even if you update your Rust software your old code will still compile.
+- Here are the following cases you may consider:
+
+  | Edition | Dependency | Will Compile?      |
+  | ------- | ---------- | ------------------ |
+  | 2015    | 2018       | :white_check_mark: |
+  | 2018    | 2015       | :white_check_mark: |
