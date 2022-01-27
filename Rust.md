@@ -1594,7 +1594,9 @@ mod tests {
 - Rust supports backward compatibility, it means even if you update your Rust software your old code will still compile.
 - Here are the following cases you may consider:
 
-  | Edition | Dependency | Will Compile?      |
-  | ------- | ---------- | ------------------ |
-  | 2015    | 2018       | :white_check_mark: |
-  | 2018    | 2015       | :white_check_mark: |
+  | Edition | Dependency |   Will Compile?    |
+  | :-----: | :--------: | :----------------: |
+  |  2015   |    2018    | :white_check_mark: |
+  |  2018   |    2015    | :white_check_mark: |
+
+- For more details, the [_Edition Guide_](https://doc.rust-lang.org/stable/edition-guide/) is a complete book about editions that enumerates the differences between editions and explains how to automatically upgrade your code to a new edition via cargo fix.
