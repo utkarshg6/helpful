@@ -74,22 +74,127 @@ For Windows:
   rustup doc
   ```
 
-- Create New Boilerplate Project
+- List the rustup toolchain
+
+  ```zsh
+  rustup toolchain list
+  ```
+
+- Install rustup toolchain
+
+  ```zsh
+  rustup toolchain install nightly-x86_64-unknown-linux-gnu
+  ```
+
+## Conventions in Rust
+
+- Rust style is to indent with four spaces, not a tab.
+
+## The `"Hello, World!"` program
+
+Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a program and give the executable to someone else, and they can run it even without having Rust installed.
+
+- Create a project folder, cd into it and create `main.rs` file:
+
+  ```zsh
+  mkdir hello_world
+  cd hello_world
+  touch main.rs
+  ```
+
+- Add the following program inside of it:
+
+  ```rust
+  // Filename: main.rs
+  fn main() {
+      println!("Hello, world!");
+  }
+  ```
+
+- Compile and run the file:
+
+  ```zsh
+  rustc main.rs
+  ```
+
+  - For Linux and macOS:
+
+    ```zsh
+    ./main
+    ```
+
+  - For Windows:
+
+    ```zsh
+    .\main
+    ```
+
+## Cargo
+
+- The package manager for rust. It does the following things:
+
+  - Manages Rust Projects
+  - Download packages or dependencies
+  - Build both your code and it's dependencies
+
+- Check Cargo Installation or Version:
+
+  ```bash
+  cargo --version
+  ```
+
+- Create New Boilerplate Project:
 
   ```bash
   cargo new {project-name}
   ```
 
-- Build a Project (Installing Dependencies and Compiling)
+- Create Boilerplate Binary Project (only `main.rs`):
+
+  ```bash
+  cargo new {project-name} --bin
+  ```
+
+- Create Boilerplate Library Project (for writing tests, contains `lib.rs`):
+
+  ```bash
+  cargo new {project-name} --lib
+  ```
+
+- Help for Cargo new:
+
+  ```bash
+  cargo new --help
+  ```
+
+- Build a Project (Installing Dependencies and Compiling):
 
   ```bash
   cargo build
   ```
 
-- Run a Project
+- Run a Project (build + run):
 
   ```bash
   cargo run
+  ```
+
+- Running through executable binary:
+
+  ```bash
+  ./target/debug/hello_cargo # or .\target\debug\hello_cargo.exe on Windows
+  ```
+
+- Compile but don't generate executable (it's just faster than `cargo build`):
+
+  ```bash
+  cargo check
+  ```
+
+- Build for releases (it's optimized and binaries lives in `target/release`):
+
+  ```bash
+  cargo build --release
   ```
 
 - We can install `cargo-expand` to use cargo libraries system wide.
@@ -104,17 +209,7 @@ For Windows:
   cargo expand
   ```
 
-- List the rustup toolchain
-
-  ```zsh
-  rustup toolchain list
-  ```
-
-- Install rustup toolchain
-
-  ```zsh
-  rustup toolchain install nightly-x86_64-unknown-linux-gnu
-  ```
+For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
 
 ## Memory Management
 
