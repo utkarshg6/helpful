@@ -197,6 +197,12 @@ Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a 
   cargo build --release
   ```
 
+- To generate docs of all dependencies of your project and run them in browser:
+
+  ```zsh
+  cargo doc --open
+  ```
+
 - We can install `cargo-expand` to use cargo libraries system wide.
 
   ```zsh
@@ -348,6 +354,46 @@ These are the crucial parts of the Memory Management:
   ```rust
   fn name_of_function(input_variable: {input_data_type}) -> {output_data_type} {
       output_variable
+  }
+  ```
+
+### Useful operations
+
+- Taking Input and performing type conversions
+
+  ```rust
+  // Always import when you want to take input from user
+  use std::io;
+
+  fn main() {
+    let mut input = String::new();
+
+    // read_line() returns io::Result, which is an enum
+    // It acts as a match, either returns Ok() with value or prints error.
+    io::stdin().read_line(&mut input)
+               .expect("Failed to read line.");
+
+    // Declaring a variable with same name again is called shadowing, mostly used for type conversions.
+    // Trims whitespaces at start and end, `/n` (newline) and `/r/n` (windows carriage return and a newline)
+    // parse() (returns Result), parses the string to a number, into the defined type
+    let input: u32 = match guess.trim()
+                                .parse()
+                                .expect("Invalid Input");
+
+    println!("Your input: {}", input);
+  }
+  ```
+
+- Generating Random Numbers (need external crate `rand`)
+
+  ```rust
+  // The Rng trait defines the functions that we'll use to generate random numbers
+  use rand::Rng;
+
+  fn main() {
+    // thread_rng() is a random number generator that is local to the current thread of execution and seeded by the operating system.
+    // gen_range() is a function part of Rng and it generates a random number of range [inclusive, exclusive), 1..101 === 1..=100
+    let random_number = rand::thread_rng().gen_range(1..101);
   }
   ```
 
