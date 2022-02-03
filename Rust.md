@@ -525,7 +525,7 @@ fn plus_one(x: i32) -> i32 {
 
 // Fail: Statement means, this function returns anything, expressed by (), a unit type
 fn plus_one(x: i32) -> i32 {
-    x + 1; 
+    x + 1;
 }
 ```
 
@@ -604,6 +604,190 @@ fn plus_one(x: i32) -> i32 {
 
       println!("The value of y is: {}", y);
   }
+  ```
+
+## Control Flow
+
+### `if` expressions
+
+- The code inside an `if` block is called an arm, similar to match.
+
+  ```rust
+  fn main() {
+      let number = 3;
+
+      if number < 5 {
+          println!("condition was true"); // An arm
+      } else {
+          println!("condition was false");
+      }
+  }
+  ```
+
+- You can only pass a `bool` to the `if` expression
+
+  ```rust
+  // FAIL: number is of type integer and not bool
+  fn main() {
+      let number = 3;
+
+      if number {
+          println!("number was three");
+      }
+  }
+
+  // This works since it's a condition
+  fn main() {
+      let number = 3;
+
+      if number != 0 {
+          println!("number was something other than zero");
+      }
+  }
+  ```
+
+- Rust only executes the block for the first true condition, and once it finds one, it doesn't even check the rest:
+
+  ```rust
+  fn main() {
+      let number = 6;
+
+      if number % 4 == 0 {
+          println!("number is divisible by 4");
+      } else if number % 3 == 0 {
+          println!("number is divisible by 3"); // Only this statement will run
+      } else if number % 2 == 0 {
+          println!("number is divisible by 2");
+      } else {
+          println!("number is not divisible by 4, 3, or 2");
+      }
+  }
+  ```
+
+- Conditionals in Single Line:
+
+  ```rust
+  // This Works
+  fn main() {
+      let condition = true;
+      let number = if condition { 5 } else { 6 };
+
+      println!("The value of number is: {}", number);
+  }
+
+  // FAIL: Different data types integer and string
+  fn main() {
+    let condition = true;
+
+    let number = if condition { 5 } else { "six" };
+
+    println!("The value of number is: {}", number);
+  }
+  ```
+
+### Loops
+
+- Rust has three kinds of loops:
+
+  1. `loop` - Infinite Loop, uses `break` and `continue`
+  2. `while` - Breaks when the condition doesn't meet.
+  3. `for` - Faster and easier to use for iterators and classical for loops.
+
+- Simple Infinite Loop:
+
+  ```rust
+  loop {
+    ...
+  }
+  ```
+
+- Named Loop:
+
+  ```rust
+  'oulter_loop: loop {
+    loop {
+      if condition {
+        break 'oulter_loop; // Breaks Outer Loop
+      }
+
+      if some_other_condition {
+        break; // Breaks Inner Loop
+      }
+    }
+  }
+  ```
+
+- Returning values in loops:
+
+  ```rust
+  fn main() {
+      let mut counter = 0;
+
+      let result = loop {
+          counter += 1;
+
+          if counter == 10 {
+              break counter * 2;
+          }
+      };
+
+      println!("The result is {}", result);
+  }
+  ```
+
+- The `while` loop:
+
+  ```rust
+  fn main() {
+      let mut number = 3;
+
+      // Prevents the use of break, by including the condition with while
+      while number != 0 {
+          println!("{}!", number);
+
+          number -= 1;
+      }
+
+      println!("LIFTOFF!!!");
+  }
+  ```
+
+- The `for` loop:
+
+  ```rust
+  // Last item in exclusive, or 0..10 === 0..=9
+  for x in 0..10 {
+      println!("{}", x); // x: i32
+  }
+  ```
+
+- The `for` loop for iterator:
+
+  ```rust
+  fn main() {
+      let a = [10, 20, 30, 40, 50];
+
+      for element in a {
+          println!("the value is: {}", element);
+      }
+  }
+  ```
+
+- The `for` loop in reverse:
+
+  ```rust
+  fn main() {
+      for number in (1..4).rev() {
+          println!("{}!", number);
+      }
+      println!("LIFTOFF!!!");
+  }
+
+  // Output:
+  // 3!
+  // 2!
+  // 1!
+  // LIFTOFF!!!
   ```
 
 ## Syntax
