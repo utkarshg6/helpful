@@ -790,6 +790,44 @@ fn plus_one(x: i32) -> i32 {
   // LIFTOFF!!!
   ```
 
+## Ownership
+
+- _Ownership_ is a set of rules that governs how a Rust program manages memory.
+- Some languages have garbage collection that constantly looks for no-longer used memory as the program runs; in other languages, the programmer must explicitly allocate and free the memory.
+- Rust uses a third approach: memory is managed through a system of ownership with a set of rules that the compiler checks.
+- If any of the rules are violated, the program won’t compile.
+- None of the features of ownership will slow down your program while it’s running.
+
+### The stack and the heap
+
+- Both the stack and the heap are parts of memory available to your code to use at runtime
+
+- Differences between Stack and Heap
+
+| Stack                                                          | Heap                                                                                       |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Value is stored in order _Last In, First Out_.                 | Value is stored at an empty spot and a _pointer_ is returned.                              |
+| More Organized                                                 | Less Organized                                                                             |
+| Operations are _push_ and _pop_.                               | Process of storing data on heap is called allocating.                                      |
+| All stored data is of fixed size.                              | Stored data can be of dynamic size.                                                        |
+| New items are stored on top of stack, hence pushing is faster. | New items are stored after searching for right place to store, hence allocating is slower. |
+
+- Pushing values onto the stack is not considered allocating. Because the pointer to the heap is a known, fixed size, you can store the pointer on the stack, but when you want the actual data, you must follow the pointer.
+- Think of heap as being seated at a restaurant.
+
+  - When you enter, you state the number of people in your group, and the staff finds an empty table that fits everyone and leads you there. If someone in your group comes late, they can ask where you’ve been seated to find you.
+  - Consider a server at a restaurant taking orders from many tables. It’s most efficient to get all the orders at one table before moving on to the next table. Taking an order from table A, then an order from table B, then one from A again, and then one from B again would be a much slower process. By the same token, a processor can do its job better if it works on data that’s close to other data (as it is on the stack) rather than farther away (as it can be on the heap). Allocating a large amount of space on the heap can also take time.
+
+- When your code calls a function, the values passed into the function (including, potentially, pointers to data on the heap) and the function’s local variables get pushed onto the stack. When the function is over, those values get popped off the stack.
+
+### Ownership Rules
+
+- These are three golden rules of ownership:
+
+  1. Each value in Rust has a variable that’s called its _owner_.
+  2. There can only be one owner at a time.
+  3. When the owner goes out of scope, the value will be dropped.
+
 ## Syntax
 
 - The “Hello, World!” Program
