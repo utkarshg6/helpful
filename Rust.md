@@ -878,6 +878,19 @@ let s2 = s1;
 
   ![If String was Copied](https://doc.rust-lang.org/book/img/trpl04-03.svg)
 
+- How does Rust clean memory after we perform `s2 = s1` and both `s1` and `s2` go out of scope?
+
+  - When a variable saved on heap goes out of scope, Rust calls a `drop` function to clean it from the memory.
+  - But we performed `let s2 = s1;`, so Rust will try to clean both `s1` and `s2`, cleaning the same memory.
+  - This problem is called _double free_ error.
+  - To solve this problem, when we perform `let s2 = s1;`, Rust actually moves the value to `s2` by invalidating `s1`.
+  - Now, Rust has to only clean the `s2` variable. Hence, the problem of double free is solved.
+  - So, what may look like a shallow copy (refer shallow and deep copy in other languages), it is actually a move operation.
+    ![Invalidation of s1](https://doc.rust-lang.org/book/img/trpl04-04.svg)
+
+- In addition, there’s a design choice that’s implied by this: Rust will never automatically create “deep” copies of your data.
+- Therefore, any automatic copying can be assumed to be inexpensive in terms of runtime performance.
+
 ## Syntax
 
 - The “Hello, World!” Program
