@@ -477,6 +477,25 @@ const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
     let string_borrow: &str = &string;
     ```
 
+- This is how `let s1 = String::from("hello");` is stored in Rust:
+
+  - Left - Parts of String that are stored on the stack:
+    1. Pointer: Points to the memory that holds the contents of the string.
+    2. Length: How much memory, in bytes, the contents of the String is currently using.
+    3. Capacity: The total amount of memory, in bytes, that the String has received from the allocator.
+  - Right - The memory on the heap that holds the contents.
+
+  ![Image](https://doc.rust-lang.org/book/img/trpl04-01.svg)
+
+- Difference between String, String Literal, String Slice
+
+  | Property          | String                                      | String Literal                 | String Slice                       |
+  | ----------------- | ------------------------------------------- | ------------------------------ | ---------------------------------- |
+  | Definition        | `let string = String::from("some_string");` | `let string_literal = "1234";` | `let string_slice = &string[1..3]` |
+  | Mutable           | :heavy_check_mark:                          | :x:                            | :x:                                |
+  | Memory Management | Heap (but deallocates when out of scope)    | Stack                          | -                                  |
+  | Use Cases         | Taking Input, or any String Manipulation    | Defining Constant Strings      | Slicing and Borrowing              |
+
 ## Functions
 
 - We define a function in Rust by entering `fn` followed by a function name and a set of parentheses.
@@ -827,6 +846,37 @@ fn plus_one(x: i32) -> i32 {
   1. Each value in Rust has a variable that’s called its _owner_.
   2. There can only be one owner at a time.
   3. When the owner goes out of scope, the value will be dropped.
+
+### What is `moved`?
+
+- This is not a move, it's a copy:
+
+```rust
+// y = x is a copy: Integers are simple values with a known, fixed size, pushed to stack, hence copied
+let x = 5;
+let y = x;
+```
+
+- This is a move:
+
+```rust
+// s1 = s2 is a move: Strings are stored on heap, hence only the data of string stored on stack is copied, hence moved
+let s1 = String::from("hello");
+let s2 = s1;
+```
+
+- Why `String` is only moved and not copied?
+  - When we assign s1 to s2, the String data is copied, meaning we copy the pointer, the length, and the capacity that are on the stack.
+  - We do not copy the data on the heap that the pointer refers to.
+  - Hence it is moved not copied.
+
+  ![Move of String](https://doc.rust-lang.org/book/img/trpl04-02.svg)
+
+- Why Rust preferes moving instead of copying the heap data?
+  - If Rust preformed copy instead of move, the operation `s2 = s1` could be very expensive in terms of runtime performance if the data on the heap were large.
+  - This is what it would look like if Rust would have copied instead of moved.
+
+  ![If String was Copied](https://doc.rust-lang.org/book/img/trpl04-03.svg)
 
 ## Syntax
 
