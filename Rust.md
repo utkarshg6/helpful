@@ -45,6 +45,12 @@ Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a 
   }
   ```
 
+- Some facts regarding the above code.
+
+  - Main function is the first function that gets called.
+  - `println!()` is not a function but a _macro_.
+  - Macros contain an `!` mark.
+
 - Compile and run the file:
 
   ```zsh
@@ -63,33 +69,7 @@ Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a 
     .\main
     ```
 
-## Memory Management
-
-These are the crucial parts of the Memory Management:
-
-- The Stack
-  - It stores the variables created by each function.
-  - It is a special region in process memory.
-  - For each call of a function, a new stack frame is allocated on top of the current one.
-  - This gives scope to the function.
-  - The size of each variable should be known at compile time.
-  - When a function exits, it’s stack frame is released.
-  - IMP: Stack has a limited size.
-  - If our program reaches end of the stack due to infinite recursion, it’ll cause the problem of Stack Overflow.
-  - We do not have to manually de-allocate the memory on stack.
-- The Heap
-  - Heap is **NOT** automatically managed.
-  - It means we’ll have to manually allocate and de-allocate the memory.
-  - It has no size restrictions but is limited by the physical memory of the system.
-  - It is accessible by any function, anywhere in the program.
-  - Heap allocations are expensive and we should avoid them whenever possible.
-  - If we allocate the memory and forget to deallocate it, the information will still exist on the heap even if the execution of the function ha ended and removed from stack, this is known as memory leak.
-  - Hence, always deallocate the memory that has been allocated in heap.
-- Pointers
-- Smart Pointers
-  - They solves the problem of memory leak as seen in allocating space in heap.
-  - They use a wrapper when declaring the variable.
-  - When the variable goes out of scope it will automatically deallocate the memory.
+- Alternatively, you may use the package manager [Cargo](#cargo) to create new boilerplate projects.
 
 ## Variables and Mutability
 
@@ -845,53 +825,6 @@ fn calculate_length(s: String) -> (String, usize) {
     (s, length)
 }
 ```
-
-## Syntax
-
-- The “Hello, World!” Program
-
-  - Main function is the first function that gets called.
-  - `println!()` is not a function but a macro
-  - Macros contain an `!` mark.
-
-  ```rust
-  fn main() {
-      println!("Hello, world!");
-  }
-  ```
-
-- Variables
-
-  - All variables in rust are immutable by default.
-
-  ```rust
-  let variable_name = name_of_function(100); // It'll figure out the data type from function's return type
-  ```
-
-- Mutable Variable
-
-  ```rust
-  let mut variable_name = name_of_function(100); // Notice new mut keyword
-  ```
-
-- Simple Function
-
-  ```rust
-  fn name_of_function(input_variable: {input_data_type}) -> {output_data_type} {
-      return output_variable;
-  }
-  ```
-
-- Simple Function without `return` keyword.
-
-  - You can remove semicolon and return keyword to return a variable.
-  - It will implicitly tell to return this variable.
-
-  ```rust
-  fn name_of_function(input_variable: {input_data_type}) -> {output_data_type} {
-      output_variable
-  }
-  ```
 
 ### Useful operations
 
