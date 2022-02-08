@@ -14,7 +14,7 @@
 - No Exceptions
   - Rust Provides No Direct Referencing, No Pointers and No Pointer Exceptions.
 - Modern Package Manager
-  - It uses Package Manager
+  - It uses Package Manager named _Cargo_.
 - No Data Race
   - A data race occurs when:
     - two or more threads in a **single process** access the same memory location concurrently, and
@@ -22,83 +22,11 @@
     - the threads are not using any exclusive locks to control their accesses to that memory
   - Game Changer for writing Asynchronous Code
 
-## Installation
-
-For Linux and macOS:
-
-- Download the rustup and install it using:
-
-  ```zsh
-  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
-  ```
-
-- You may need to install C compiler, because it'll give you a linker and also because some common Rust packages depend on C code:
-
-  - For macOS:
-
-    ```zsh
-    xcode-select --install
-    ```
-
-  - For Linux:
-
-    Linux users should generally install GCC or Clang, according to their distribution’s documentation. For example, if you use Ubuntu, you can install the `build-essential` package.
-
-For Windows:
-
-- People should follow [these instructions](https://www.rust-lang.org/tools/install) to install Rust. Also, install [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
-
-## Rust Basic Commands
-
-- To check version or to verify that Rust is installed properly:
-
-  ```zsh
-  rustc --version
-  ```
-
-- Update Rust:
-
-  ```zsh
-  rustup update
-  ```
-
-- Uninstall Rust and rustup:
-
-  ```zsh
-  rustup self uninstall
-  ```
-
-- Open Rust Docs locally on browser:
-
-  ```zsh
-  rustup doc
-  ```
-
-- List the rustup toolchain
-
-  ```zsh
-  rustup toolchain list
-  ```
-
-- Install rustup toolchain
-
-  ```zsh
-  rustup toolchain install nightly-x86_64-unknown-linux-gnu
-  ```
-
-## Conventions in Rust
-
-- Rust code uses _snake case_ as the conventional style for function and variable names, in which all letters are lowercase and underscores separate words.
-- Rust style is to indent with four spaces, not a tab.
-- Naming convention for constants is to use all uppercase with underscores between words.
-
-  ```rust
-  const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
-  ```
-
 ## The `"Hello, World!"` program
 
 Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a program and give the executable to someone else, and they can run it even without having Rust installed.
+
+- After [installing Rust](#installation), you may follow the following steps.
 
 - Create a project folder, cd into it and create `main.rs` file:
 
@@ -116,6 +44,12 @@ Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a 
       println!("Hello, world!");
   }
   ```
+
+- Some facts regarding the above code.
+
+  - Main function is the first function that gets called.
+  - `println!()` is not a function but a _macro_.
+  - Macros contain an `!` mark.
 
 - Compile and run the file:
 
@@ -135,121 +69,7 @@ Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a 
     .\main
     ```
 
-## Cargo
-
-- The package manager for rust. It does the following things:
-
-  - Manages Rust Projects
-  - Download packages or dependencies
-  - Build both your code and it's dependencies
-
-- Check Cargo Installation or Version:
-
-  ```bash
-  cargo --version
-  ```
-
-- Create New Boilerplate Project:
-
-  ```bash
-  cargo new {project-name}
-  ```
-
-- Create Boilerplate Binary Project (only `main.rs`):
-
-  ```bash
-  cargo new {project-name} --bin
-  ```
-
-- Create Boilerplate Library Project (for writing tests, contains `lib.rs`):
-
-  ```bash
-  cargo new {project-name} --lib
-  ```
-
-- Help for Cargo new:
-
-  ```bash
-  cargo new --help
-  ```
-
-- Build a Project (Installing Dependencies and Compiling):
-
-  ```bash
-  cargo build
-  ```
-
-- Run a Project (build + run):
-
-  ```bash
-  cargo run
-  ```
-
-- Running through executable binary:
-
-  ```bash
-  ./target/debug/hello_cargo # or .\target\debug\hello_cargo.exe on Windows
-  ```
-
-- Compile but don't generate executable (it's just faster than `cargo build`):
-
-  ```bash
-  cargo check
-  ```
-
-- Build for releases (it's optimized and binaries lives in `target/release`):
-
-  ```bash
-  cargo build --release
-  ```
-
-- To generate docs of all dependencies of your project and run them in browser:
-
-  ```zsh
-  cargo doc --open
-  ```
-
-- We can install `cargo-expand` to use cargo libraries system wide.
-
-  ```zsh
-  cargo install cargo-expand
-  ```
-
-- The cargo expand command
-
-  ```zsh
-  cargo expand
-  ```
-
-For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
-
-## Memory Management
-
-These are the crucial parts of the Memory Management:
-
-- The Stack
-  - It stores the variables created by each function.
-  - It is a special region in process memory.
-  - For each call of a function, a new stack frame is allocated on top of the current one.
-  - This gives scope to the function.
-  - The size of each variable should be known at compile time.
-  - When a function exits, it’s stack frame is released.
-  - IMP: Stack has a limited size.
-  - If our program reaches end of the stack due to infinite recursion, it’ll cause the problem of Stack Overflow.
-  - We do not have to manually de-allocate the memory on stack.
-- The Heap
-  - Heap is **NOT** automatically managed.
-  - It means we’ll have to manually allocate and de-allocate the memory.
-  - It has no size restrictions but is limited by the physical memory of the system.
-  - It is accessible by any function, anywhere in the program.
-  - Heap allocations are expensive and we should avoid them whenever possible.
-  - If we allocate the memory and forget to deallocate it, the information will still exist on the heap even if the execution of the function ha ended and removed from stack, this is known as memory leak.
-  - Hence, always deallocate the memory that has been allocated in heap.
-- Pointers
-- Smart Pointers
-  - They solves the problem of memory leak as seen in allocating space in heap.
-  - They use a wrapper when declaring the variable.
-  - When the variable goes out of scope it will automatically deallocate the memory.
+- Alternatively, you may use the package manager [Cargo](#cargo) to create new boilerplate projects.
 
 ## Variables and Mutability
 
@@ -716,11 +536,21 @@ fn plus_one(x: i32) -> i32 {
 
   ```rust
   loop {
-    ...
+    // Do something iteratively
   }
   ```
 
-- Named Loop:
+- Named Loop
+
+  ```rust
+  'outer:loop {
+   loop {
+    break 'outer;
+   }
+  }
+  ```
+
+- Named Loop with different breaks:
 
   ```rust
   'oulter_loop: loop {
@@ -789,6 +619,22 @@ fn plus_one(x: i32) -> i32 {
       for element in a {
           println!("the value is: {}", element);
       }
+  }
+  ```
+
+- A for loop for iterating characters in String
+
+  ```rust
+  for c in name.chars() {
+      // c variable stores one charater per iteration
+  }
+  ```
+
+- Enumeration
+
+  ```rust
+  for (i, v) in request.chars().enumerate() {
+      // i is index, v is variable
   }
   ```
 
@@ -955,32 +801,21 @@ fn makes_copy(some_integer: i32) { // some_integer comes into scope
 
 ```rust
 fn main() {
-    let s1 = gives_ownership();         // gives_ownership moves its return
-                                        // value into s1
-
+    let s1 = gives_ownership();         // gives_ownership moves its return value into s1
     let s2 = String::from("hello");     // s2 comes into scope
 
-    let s3 = takes_and_gives_back(s2);  // s2 is moved into
-                                        // takes_and_gives_back, which also
-                                        // moves its return value into s3
+    let s3 = takes_and_gives_back(s2);  // s2 is moved into takes_and_gives_back, which also moves its return value into s3
 } // Here, s3 goes out of scope and is dropped. s2 was moved, so nothing
   // happens. s1 goes out of scope and is dropped.
 
-fn gives_ownership() -> String {             // gives_ownership will move its
-                                             // return value into the function
-                                             // that calls it
-
+fn gives_ownership() -> String { // gives_ownership will move its return value into the function that calls it
     let some_string = String::from("yours"); // some_string comes into scope
 
-    some_string                              // some_string is returned and
-                                             // moves out to the calling
-                                             // function
+    some_string // some_string is returned and moves out to the calling function
 }
 
 // This function takes a String and returns one
-fn takes_and_gives_back(a_string: String) -> String { // a_string comes into
-                                                      // scope
-
+fn takes_and_gives_back(a_string: String) -> String { // a_string comes into scope
     a_string  // a_string is returned and moves out to the calling function
 }
 ```
@@ -1005,53 +840,6 @@ fn calculate_length(s: String) -> (String, usize) {
     (s, length)
 }
 ```
-
-## Syntax
-
-- The “Hello, World!” Program
-
-  - Main function is the first function that gets called.
-  - `println!()` is not a function but a macro
-  - Macros contain an `!` mark.
-
-  ```rust
-  fn main() {
-      println!("Hello, world!");
-  }
-  ```
-
-- Variables
-
-  - All variables in rust are immutable by default.
-
-  ```rust
-  let variable_name = name_of_function(100); // It'll figure out the data type from function's return type
-  ```
-
-- Mutable Variable
-
-  ```rust
-  let mut variable_name = name_of_function(100); // Notice new mut keyword
-  ```
-
-- Simple Function
-
-  ```rust
-  fn name_of_function(input_variable: {input_data_type}) -> {output_data_type} {
-      return output_variable;
-  }
-  ```
-
-- Simple Function without `return` keyword.
-
-  - You can remove semicolon and return keyword to return a variable.
-  - It will implicitly tell to return this variable.
-
-  ```rust
-  fn name_of_function(input_variable: {input_data_type}) -> {output_data_type} {
-      output_variable
-  }
-  ```
 
 ### Useful operations
 
@@ -1136,30 +924,6 @@ fn calculate_length(s: String) -> (String, usize) {
   ```rust
   let mut input = String::new(); // Create a New String (String is a type of Smart Pointer)
   io::stdin().read_line(&mut input);
-  ```
-
-### Ownership
-
-- Each value in rust is owned by a variable.
-
-- When the owner gets out of scope, the value will be deallocated.
-
-- There can only be **ONE** owner at a time.
-
-- This means that no two pointers can point to two values.
-
-- Ownership Transfer
-
-  ```rust
-  let mut input = String::new(); // String is a Smart Pointer, so is a part of heap
-  let mut s = input; // Since String is on heap, so it's ownership gets transferred from input to s
-  ```
-
-- Value Copied
-
-  ```rust
-  let a = 5; // Variable a is a number, so it is a part of stack.
-  let b = a; // Since 5 is on stack, so it's value gets copied to b.
   ```
 
 - Why we can’t pass `input` variable directly to `io`.
@@ -1485,42 +1249,6 @@ super::<module-name>::<name-of-publicly-accessible-item>
 
 // Example
 super::method::Method
-```
-
-## Loops
-
-- Rust offers `loop` which is similar to while loop in python.
-
-```rust
-loop {
-    // do something iteratively
-}
-```
-
-- Labeled Loops and breaking them
-
-```rust
-'outer:loop {
- loop {
-  break 'outer;
- }
-}
-```
-
-- It also offers traditional for loop.
-
-```rust
-for c in name.chars() {
-    // c variable stores one charater per iteration
-}
-```
-
-- Enumeration
-
-```rust
-for (i, v) in request.chars().enumerate() {
-    // i is index, v is variable
-}
 ```
 
 ## Tuples
@@ -2487,3 +2215,167 @@ mod tests {
   |  2018   |    2015    | :white_check_mark: |
 
 - For more details, the [_Edition Guide_](https://doc.rust-lang.org/stable/edition-guide/) is a complete book about editions that enumerates the differences between editions and explains how to automatically upgrade your code to a new edition via cargo fix.
+
+## Appendix
+
+### Installation
+
+For Linux and macOS:
+
+- Download the rustup and install it using:
+
+  ```zsh
+  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+  ```
+
+- You may need to install C compiler, because it'll give you a linker and also because some common Rust packages depend on C code:
+
+  - For macOS:
+
+    ```zsh
+    xcode-select --install
+    ```
+
+  - For Linux:
+
+    Linux users should generally install GCC or Clang, according to their distribution’s documentation. For example, if you use Ubuntu, you can install the `build-essential` package.
+
+For Windows:
+
+- People should follow [these instructions](https://www.rust-lang.org/tools/install) to install Rust. Also, install [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+
+### Rust Basic Commands
+
+- To check version or to verify that Rust is installed properly:
+
+  ```zsh
+  rustc --version
+  ```
+
+- Update Rust:
+
+  ```zsh
+  rustup update
+  ```
+
+- Uninstall Rust and rustup:
+
+  ```zsh
+  rustup self uninstall
+  ```
+
+- Open Rust Docs locally on browser:
+
+  ```zsh
+  rustup doc
+  ```
+
+- List the rustup toolchain
+
+  ```zsh
+  rustup toolchain list
+  ```
+
+- Install rustup toolchain
+
+  ```zsh
+  rustup toolchain install nightly-x86_64-unknown-linux-gnu
+  ```
+
+### Conventions in Rust
+
+- Rust code uses _snake case_ as the conventional style for function and variable names, in which all letters are lowercase and underscores separate words.
+- Rust style is to indent with four spaces, not a tab.
+- Naming convention for constants is to use all uppercase with underscores between words.
+
+  ```rust
+  const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
+  ```
+
+### Cargo
+
+- The package manager for rust. It does the following things:
+
+  - Manages Rust Projects
+  - Download packages or dependencies
+  - Build both your code and it's dependencies
+
+- Check Cargo Installation or Version:
+
+  ```bash
+  cargo --version
+  ```
+
+- Create New Boilerplate Project:
+
+  ```bash
+  cargo new {project-name}
+  ```
+
+- Create Boilerplate Binary Project (only `main.rs`):
+
+  ```bash
+  cargo new {project-name} --bin
+  ```
+
+- Create Boilerplate Library Project (for writing tests, contains `lib.rs`):
+
+  ```bash
+  cargo new {project-name} --lib
+  ```
+
+- Help for Cargo new:
+
+  ```bash
+  cargo new --help
+  ```
+
+- Build a Project (Installing Dependencies and Compiling):
+
+  ```bash
+  cargo build
+  ```
+
+- Run a Project (build + run):
+
+  ```bash
+  cargo run
+  ```
+
+- Running through executable binary:
+
+  ```bash
+  ./target/debug/hello_cargo # or .\target\debug\hello_cargo.exe on Windows
+  ```
+
+- Compile but don't generate executable (it's just faster than `cargo build`):
+
+  ```bash
+  cargo check
+  ```
+
+- Build for releases (it's optimized and binaries lives in `target/release`):
+
+  ```bash
+  cargo build --release
+  ```
+
+- To generate docs of all dependencies of your project and run them in browser:
+
+  ```zsh
+  cargo doc --open
+  ```
+
+- We can install `cargo-expand` to use cargo libraries system wide.
+
+  ```zsh
+  cargo install cargo-expand
+  ```
+
+- The cargo expand command
+
+  ```zsh
+  cargo expand
+  ```
+
+For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
