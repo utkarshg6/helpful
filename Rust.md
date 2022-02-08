@@ -536,11 +536,21 @@ fn plus_one(x: i32) -> i32 {
 
   ```rust
   loop {
-    ...
+    // Do something iteratively
   }
   ```
 
-- Named Loop:
+- Named Loop
+
+  ```rust
+  'outer:loop {
+   loop {
+    break 'outer;
+   }
+  }
+  ```
+
+- Named Loop with different breaks:
 
   ```rust
   'oulter_loop: loop {
@@ -609,6 +619,22 @@ fn plus_one(x: i32) -> i32 {
       for element in a {
           println!("the value is: {}", element);
       }
+  }
+  ```
+
+- A for loop for iterating characters in String
+
+  ```rust
+  for c in name.chars() {
+      // c variable stores one charater per iteration
+  }
+  ```
+
+- Enumeration
+
+  ```rust
+  for (i, v) in request.chars().enumerate() {
+      // i is index, v is variable
   }
   ```
 
@@ -775,32 +801,21 @@ fn makes_copy(some_integer: i32) { // some_integer comes into scope
 
 ```rust
 fn main() {
-    let s1 = gives_ownership();         // gives_ownership moves its return
-                                        // value into s1
-
+    let s1 = gives_ownership();         // gives_ownership moves its return value into s1
     let s2 = String::from("hello");     // s2 comes into scope
 
-    let s3 = takes_and_gives_back(s2);  // s2 is moved into
-                                        // takes_and_gives_back, which also
-                                        // moves its return value into s3
+    let s3 = takes_and_gives_back(s2);  // s2 is moved into takes_and_gives_back, which also moves its return value into s3
 } // Here, s3 goes out of scope and is dropped. s2 was moved, so nothing
   // happens. s1 goes out of scope and is dropped.
 
-fn gives_ownership() -> String {             // gives_ownership will move its
-                                             // return value into the function
-                                             // that calls it
-
+fn gives_ownership() -> String { // gives_ownership will move its return value into the function that calls it
     let some_string = String::from("yours"); // some_string comes into scope
 
-    some_string                              // some_string is returned and
-                                             // moves out to the calling
-                                             // function
+    some_string // some_string is returned and moves out to the calling function
 }
 
 // This function takes a String and returns one
-fn takes_and_gives_back(a_string: String) -> String { // a_string comes into
-                                                      // scope
-
+fn takes_and_gives_back(a_string: String) -> String { // a_string comes into scope
     a_string  // a_string is returned and moves out to the calling function
 }
 ```
@@ -909,30 +924,6 @@ fn calculate_length(s: String) -> (String, usize) {
   ```rust
   let mut input = String::new(); // Create a New String (String is a type of Smart Pointer)
   io::stdin().read_line(&mut input);
-  ```
-
-### Ownership
-
-- Each value in rust is owned by a variable.
-
-- When the owner gets out of scope, the value will be deallocated.
-
-- There can only be **ONE** owner at a time.
-
-- This means that no two pointers can point to two values.
-
-- Ownership Transfer
-
-  ```rust
-  let mut input = String::new(); // String is a Smart Pointer, so is a part of heap
-  let mut s = input; // Since String is on heap, so it's ownership gets transferred from input to s
-  ```
-
-- Value Copied
-
-  ```rust
-  let a = 5; // Variable a is a number, so it is a part of stack.
-  let b = a; // Since 5 is on stack, so it's value gets copied to b.
   ```
 
 - Why we can’t pass `input` variable directly to `io`.
@@ -1258,42 +1249,6 @@ super::<module-name>::<name-of-publicly-accessible-item>
 
 // Example
 super::method::Method
-```
-
-## Loops
-
-- Rust offers `loop` which is similar to while loop in python.
-
-```rust
-loop {
-    // do something iteratively
-}
-```
-
-- Labeled Loops and breaking them
-
-```rust
-'outer:loop {
- loop {
-  break 'outer;
- }
-}
-```
-
-- It also offers traditional for loop.
-
-```rust
-for c in name.chars() {
-    // c variable stores one charater per iteration
-}
-```
-
-- Enumeration
-
-```rust
-for (i, v) in request.chars().enumerate() {
-    // i is index, v is variable
-}
 ```
 
 ## Tuples
