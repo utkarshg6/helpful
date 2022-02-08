@@ -14,7 +14,7 @@
 - No Exceptions
   - Rust Provides No Direct Referencing, No Pointers and No Pointer Exceptions.
 - Modern Package Manager
-  - It uses Package Manager
+  - It uses Package Manager named _Cargo_.
 - No Data Race
   - A data race occurs when:
     - two or more threads in a **single process** access the same memory location concurrently, and
@@ -22,83 +22,11 @@
     - the threads are not using any exclusive locks to control their accesses to that memory
   - Game Changer for writing Asynchronous Code
 
-## Installation
-
-For Linux and macOS:
-
-- Download the rustup and install it using:
-
-  ```zsh
-  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
-  ```
-
-- You may need to install C compiler, because it'll give you a linker and also because some common Rust packages depend on C code:
-
-  - For macOS:
-
-    ```zsh
-    xcode-select --install
-    ```
-
-  - For Linux:
-
-    Linux users should generally install GCC or Clang, according to their distribution’s documentation. For example, if you use Ubuntu, you can install the `build-essential` package.
-
-For Windows:
-
-- People should follow [these instructions](https://www.rust-lang.org/tools/install) to install Rust. Also, install [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
-
-## Rust Basic Commands
-
-- To check version or to verify that Rust is installed properly:
-
-  ```zsh
-  rustc --version
-  ```
-
-- Update Rust:
-
-  ```zsh
-  rustup update
-  ```
-
-- Uninstall Rust and rustup:
-
-  ```zsh
-  rustup self uninstall
-  ```
-
-- Open Rust Docs locally on browser:
-
-  ```zsh
-  rustup doc
-  ```
-
-- List the rustup toolchain
-
-  ```zsh
-  rustup toolchain list
-  ```
-
-- Install rustup toolchain
-
-  ```zsh
-  rustup toolchain install nightly-x86_64-unknown-linux-gnu
-  ```
-
-## Conventions in Rust
-
-- Rust code uses _snake case_ as the conventional style for function and variable names, in which all letters are lowercase and underscores separate words.
-- Rust style is to indent with four spaces, not a tab.
-- Naming convention for constants is to use all uppercase with underscores between words.
-
-  ```rust
-  const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
-  ```
-
 ## The `"Hello, World!"` program
 
 Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a program and give the executable to someone else, and they can run it even without having Rust installed.
+
+- After [installing Rust](#installation), you may follow the following steps.
 
 - Create a project folder, cd into it and create `main.rs` file:
 
@@ -134,94 +62,6 @@ Fun Fact: Rust is an ahead-of-time compiled language, meaning you can compile a 
     ```zsh
     .\main
     ```
-
-## Cargo
-
-- The package manager for rust. It does the following things:
-
-  - Manages Rust Projects
-  - Download packages or dependencies
-  - Build both your code and it's dependencies
-
-- Check Cargo Installation or Version:
-
-  ```bash
-  cargo --version
-  ```
-
-- Create New Boilerplate Project:
-
-  ```bash
-  cargo new {project-name}
-  ```
-
-- Create Boilerplate Binary Project (only `main.rs`):
-
-  ```bash
-  cargo new {project-name} --bin
-  ```
-
-- Create Boilerplate Library Project (for writing tests, contains `lib.rs`):
-
-  ```bash
-  cargo new {project-name} --lib
-  ```
-
-- Help for Cargo new:
-
-  ```bash
-  cargo new --help
-  ```
-
-- Build a Project (Installing Dependencies and Compiling):
-
-  ```bash
-  cargo build
-  ```
-
-- Run a Project (build + run):
-
-  ```bash
-  cargo run
-  ```
-
-- Running through executable binary:
-
-  ```bash
-  ./target/debug/hello_cargo # or .\target\debug\hello_cargo.exe on Windows
-  ```
-
-- Compile but don't generate executable (it's just faster than `cargo build`):
-
-  ```bash
-  cargo check
-  ```
-
-- Build for releases (it's optimized and binaries lives in `target/release`):
-
-  ```bash
-  cargo build --release
-  ```
-
-- To generate docs of all dependencies of your project and run them in browser:
-
-  ```zsh
-  cargo doc --open
-  ```
-
-- We can install `cargo-expand` to use cargo libraries system wide.
-
-  ```zsh
-  cargo install cargo-expand
-  ```
-
-- The cargo expand command
-
-  ```zsh
-  cargo expand
-  ```
-
-For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
 
 ## Memory Management
 
@@ -2487,3 +2327,167 @@ mod tests {
   |  2018   |    2015    | :white_check_mark: |
 
 - For more details, the [_Edition Guide_](https://doc.rust-lang.org/stable/edition-guide/) is a complete book about editions that enumerates the differences between editions and explains how to automatically upgrade your code to a new edition via cargo fix.
+
+## Appendix
+
+### Installation
+
+For Linux and macOS:
+
+- Download the rustup and install it using:
+
+  ```zsh
+  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+  ```
+
+- You may need to install C compiler, because it'll give you a linker and also because some common Rust packages depend on C code:
+
+  - For macOS:
+
+    ```zsh
+    xcode-select --install
+    ```
+
+  - For Linux:
+
+    Linux users should generally install GCC or Clang, according to their distribution’s documentation. For example, if you use Ubuntu, you can install the `build-essential` package.
+
+For Windows:
+
+- People should follow [these instructions](https://www.rust-lang.org/tools/install) to install Rust. Also, install [Build Tools for Visual Studio 2019](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+
+### Rust Basic Commands
+
+- To check version or to verify that Rust is installed properly:
+
+  ```zsh
+  rustc --version
+  ```
+
+- Update Rust:
+
+  ```zsh
+  rustup update
+  ```
+
+- Uninstall Rust and rustup:
+
+  ```zsh
+  rustup self uninstall
+  ```
+
+- Open Rust Docs locally on browser:
+
+  ```zsh
+  rustup doc
+  ```
+
+- List the rustup toolchain
+
+  ```zsh
+  rustup toolchain list
+  ```
+
+- Install rustup toolchain
+
+  ```zsh
+  rustup toolchain install nightly-x86_64-unknown-linux-gnu
+  ```
+
+### Conventions in Rust
+
+- Rust code uses _snake case_ as the conventional style for function and variable names, in which all letters are lowercase and underscores separate words.
+- Rust style is to indent with four spaces, not a tab.
+- Naming convention for constants is to use all uppercase with underscores between words.
+
+  ```rust
+  const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
+  ```
+
+### Cargo
+
+- The package manager for rust. It does the following things:
+
+  - Manages Rust Projects
+  - Download packages or dependencies
+  - Build both your code and it's dependencies
+
+- Check Cargo Installation or Version:
+
+  ```bash
+  cargo --version
+  ```
+
+- Create New Boilerplate Project:
+
+  ```bash
+  cargo new {project-name}
+  ```
+
+- Create Boilerplate Binary Project (only `main.rs`):
+
+  ```bash
+  cargo new {project-name} --bin
+  ```
+
+- Create Boilerplate Library Project (for writing tests, contains `lib.rs`):
+
+  ```bash
+  cargo new {project-name} --lib
+  ```
+
+- Help for Cargo new:
+
+  ```bash
+  cargo new --help
+  ```
+
+- Build a Project (Installing Dependencies and Compiling):
+
+  ```bash
+  cargo build
+  ```
+
+- Run a Project (build + run):
+
+  ```bash
+  cargo run
+  ```
+
+- Running through executable binary:
+
+  ```bash
+  ./target/debug/hello_cargo # or .\target\debug\hello_cargo.exe on Windows
+  ```
+
+- Compile but don't generate executable (it's just faster than `cargo build`):
+
+  ```bash
+  cargo check
+  ```
+
+- Build for releases (it's optimized and binaries lives in `target/release`):
+
+  ```bash
+  cargo build --release
+  ```
+
+- To generate docs of all dependencies of your project and run them in browser:
+
+  ```zsh
+  cargo doc --open
+  ```
+
+- We can install `cargo-expand` to use cargo libraries system wide.
+
+  ```zsh
+  cargo install cargo-expand
+  ```
+
+- The cargo expand command
+
+  ```zsh
+  cargo expand
+  ```
+
+For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
