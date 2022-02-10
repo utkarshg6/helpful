@@ -248,14 +248,34 @@ const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
   let second = a[1];
   ```
 
+#### Slicing an array
+
+- It is possible to slice an array in Rust.
+
+  ```rust
+  let a = [1, 2, 3, 4, 5];
+
+  let slice = &a[1..3]; // It is of type &[i32]
+  ```
+
+#### Ranges
+
+- You can create a range with `..` operator.
+- The following are equal:
+  - `1..5` ~ `1..=4`
+  - `0..4` ~ `..4`
+  - `1..len` ~ `1..`
+  - `0..len` ~ `..`
+
 ### Advanced Data Types
 
-- Strings
+#### Strings
 
-  - They are of two types:
+- They are represented in three types:
 
-    - `String` - A smart pointer.
-    - `&str` - Also known as string slice is an immutable reference to a part of string.
+  - `String` - A smart pointer.
+  - `&String` - Reference to a String.
+  - `&str` - String Slice
 
   - Defining a String
 
@@ -275,7 +295,7 @@ const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
     let string_slice = &string[..12]; // Give me everything upto 12th byte not character
     ```
 
-  - Rust uses utf encoding. So, prefer not to not pass integer values for slicing, as the slice function slices on the basis of bytes instead of characters.
+  - Rust uses UTF-8 encoding. So, prefer not to not pass integer values for slicing, as the slice function slices on the basis of bytes instead of characters.
 
     ```rust
     let string = String::from("😀😃😄😁");
@@ -307,14 +327,50 @@ const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;
 
   ![Image](https://doc.rust-lang.org/book/img/trpl04-01.svg)
 
+## String Slicing
+
+- Slices let you reference a contiguous sequence of elements in a collection rather than the whole collection.
+- A slice is a kind of reference, so it does not have ownership.
+- Slices are represented by `&str` and are _immutable_.
+
+  ```rust
+      let s = String::from("hello world");
+
+      let hello = &s[0..5]; // or you can use &s[..5]
+      let world = &s[6..11];
+  ```
+
+- This will throw compile-time error:
+
+  ```rust
+  // FAIL: You cannot clear the memory, to which some reference already exists
+  fn main() {
+      let mut s = String::from("hello world");
+
+      let word = first_word(&s); // Returns a &str, which is a referenc to s
+
+      s.clear(); // error!
+
+      println!("the first word is: {}", word);
+  }
+  ```
+
+- Thus, String Slices helps us write secure code by protecting the references to a string.
+- Also string literals `let string_literal = "hello";`, are string slices `&str`, and are immutable.
+
+Note: It is expected that the String only contains ASCII characters, because in case of UTF-8, if we try to slice between a multibyte character, it'll cause an error.
+
+- The correct way to use referencing is discussed int the section, ["Which is better `&String` or `&str`?"](#which-is-better-string-or-str).
+
 - Difference between String, String Literal, String Slice
 
-  | Property          | String                                      | String Literal                 | String Slice                       |
-  | ----------------- | ------------------------------------------- | ------------------------------ | ---------------------------------- |
-  | Definition        | `let string = String::from("some_string");` | `let string_literal = "1234";` | `let string_slice = &string[1..3]` |
-  | Mutable           | :heavy_check_mark:                          | :x:                            | :x:                                |
-  | Memory Management | Heap (but deallocates when out of scope)    | Stack                          | -                                  |
-  | Use Cases         | Taking Input, or any String Manipulation    | Defining Constant Strings      | Slicing and Borrowing              |
+  | Property          | String                                      | String Literal                 | String Slice                       | Reference to String              |
+  | ----------------- | ------------------------------------------- | ------------------------------ | ---------------------------------- | -------------------------------- |
+  | Definition        | `let string = String::from("some_string");` | `let string_literal = "1234";` | `let string_slice = &string[1..3]` | `let string_reference = &string` |
+  | Representation    | `String`                                    | `&str`                         | `&str`                             | `&String`                        |
+  | Mutable           | :white_check_mark:                          | :x:                            | :x:                                | :x:                              |
+  | Memory Management | Heap (but deallocates when out of scope)    | Heap (Points to binary)        | Heap (Points to Binary)            | Heap                             |
+  | Use Cases         | Taking Input, or any String Manipulation    | Defining Constant Strings      | Slicing and Borrowing              | Borrowing                        |
 
 ## Functions
 
@@ -900,7 +956,45 @@ fn calculate_length(s: String) -> (String, usize) {
   }
   ```
 
-#### Data Race
+### Referencing for strings
+
+#### Which is better `&String` or `&str`?
+
+- Short Answer: `&str`.
+- Reason: It allows us to use the same function on both `&String` values and `&str` values.
+
+  ```rust
+  fn first_word(s: &String) -> &str { // This sucks, only allows &String
+
+  fn first_word(s: &str) -> &str { // Rustaceans prefer this, since it allows both `&String` and `&str`.
+  ```
+
+- Basically, `&str` works for all types of references:
+
+  ```rust
+  fn main() {
+      let my_string = String::from("hello world");
+
+      // `first_word` works on slices of `String`s, whether partial or whole
+      let word = first_word(&my_string[0..6]);
+      let word = first_word(&my_string[..]);
+      // `first_word` also works on references to `String`s, which are equivalent
+      // to whole slices of `String`s
+      let word = first_word(&my_string);
+
+      let my_string_literal = "hello world";
+
+      // `first_word` works on slices of string literals, whether partial or whole
+      let word = first_word(&my_string_literal[0..6]);
+      let word = first_word(&my_string_literal[..]);
+
+      // Because string literals *are* string slices already,
+      // this works too, without the slice syntax!
+      let word = first_word(my_string_literal);
+  }
+  ```
+
+### Data Race
 
 - The _data race_ condition happens when these three behaviors occur:
 
@@ -974,7 +1068,7 @@ fn calculate_length(s: String) -> (String, usize) {
       let r2 = &mut s;
   ```
 
-#### Dangling References
+### Dangling References
 
 - Dangling Reference is a reference to a location in memory which is freed but the reference exists.
 - In languages with pointers, it’s easy to erroneously create a dangling pointer.
@@ -1008,71 +1102,6 @@ fn calculate_length(s: String) -> (String, usize) {
 
 1. [No Data Racing](#data-race) - At any given time, you can have either one mutable reference or any number of immutable references.
 2. [No Dangling References](#dangling-references) - References must always be valid.
-
-## Slicing
-
-- Slices let you reference a contiguous sequence of elements in a collection rather than the whole collection.
-- A slice is a kind of reference, so it does not have ownership.
-- Slices are represented by `&str` and are _immutable_.
-
-  ```rust
-      let s = String::from("hello world");
-
-      let hello = &s[0..5]; // or you can use &s[..5]
-      let world = &s[6..11];
-  ```
-
-- This will throw compile-time error:
-
-  ```rust
-  // FAIL: You cannot clear the memory, to which some reference already exists
-  fn main() {
-      let mut s = String::from("hello world");
-
-      let word = first_word(&s); // Returns a &str, which is a referenc to s
-
-      s.clear(); // error!
-
-      println!("the first word is: {}", word);
-  }
-  ```
-
-- Thus, String Slices helps us write secure code by protecting the references to a string.
-- Also string literals `let string_literal = "hello";`, are string slices `&str`, and are immutable.
-
-Note: It is expected that the String only contains ASCII characters, because in case of UTF-8, if we try to slice between a multibyte character, it'll cause an error.
-
-### Which is better `&String` or `&str`?
-
-- Short Answer: `&str`.
-- Reason: It allows us to use the same function on both `&String` values and `&str` values.
-
-  ```rust
-  fn first_word(s: &String) -> &str { // This sucks, only allows &String
-
-  fn first_word(s: &str) -> &str { // Rustaceans prefer this, since it allows both `&String` and `&str`.
-  ```
-
-- Basically, now our function will work on `&my_string[0..6]`, `&my_string[..]`, `&my_string`, `&my_string_literal[0..6]`, `&my_string_literal[..]`, and `my_string_literal`.
-
-### Slicing an array
-
-- We can similarly slice an array.
-
-  ```rust
-  let a = [1, 2, 3, 4, 5];
-
-  let slice = &a[1..3]; // It is of type &[i32]
-  ```
-
-### Ranges
-
-- You can create a range with `..` operator.
-- The following are equal:
-  - `1..5` ~ `1..=4`
-  - `0..4` ~ `..4`
-  - `1..len` ~ `1..`
-  - `0..len` ~ `..`
 
 ### Useful operations
 
