@@ -1009,6 +1009,71 @@ fn calculate_length(s: String) -> (String, usize) {
 1. [No Data Racing](#data-race) - At any given time, you can have either one mutable reference or any number of immutable references.
 2. [No Dangling References](#dangling-references) - References must always be valid.
 
+## Slicing
+
+- Slices let you reference a contiguous sequence of elements in a collection rather than the whole collection.
+- A slice is a kind of reference, so it does not have ownership.
+- Slices are represented by `&str` and are _immutable_.
+
+  ```rust
+      let s = String::from("hello world");
+
+      let hello = &s[0..5]; // or you can use &s[..5]
+      let world = &s[6..11];
+  ```
+
+- This will throw compile-time error:
+
+  ```rust
+  // FAIL: You cannot clear the memory, to which some reference already exists
+  fn main() {
+      let mut s = String::from("hello world");
+
+      let word = first_word(&s); // Returns a &str, which is a referenc to s
+
+      s.clear(); // error!
+
+      println!("the first word is: {}", word);
+  }
+  ```
+
+- Thus, String Slices helps us write secure code by protecting the references to a string.
+- Also string literals `let string_literal = "hello";`, are string slices `&str`, and are immutable.
+
+Note: It is expected that the String only contains ASCII characters, because in case of UTF-8, if we try to slice between a multibyte character, it'll cause an error.
+
+### Which is better `&String` or `&str`?
+
+- Short Answer: `&str`.
+- Reason: It allows us to use the same function on both `&String` values and `&str` values.
+
+  ```rust
+  fn first_word(s: &String) -> &str { // This sucks, only allows &String
+
+  fn first_word(s: &str) -> &str { // Rustaceans prefer this, since it allows both `&String` and `&str`.
+  ```
+
+- Basically, now our function will work on `&my_string[0..6]`, `&my_string[..]`, `&my_string`, `&my_string_literal[0..6]`, `&my_string_literal[..]`, and `my_string_literal`.
+
+### Slicing an array
+
+- We can similarly slice an array.
+
+  ```rust
+  let a = [1, 2, 3, 4, 5];
+
+  let slice = &a[1..3]; // It is of type &[i32]
+  ```
+
+### Ranges
+
+- You can create a range with `..` operator.
+- The following are equal:
+  - `1..5` ~ `1..=4`
+  - `0..4` ~ `..4`
+  - `1..len` ~ `1..`
+  - `0..len` ~ `..`
+
 ### Useful operations
 
 - Taking Input and performing type conversions
@@ -1909,7 +1974,21 @@ fn main() {
     };
 ```
 
-### Iterator, Enumerator, Map, Filter
+### Iterators
+
+#### Difference between `iter`, `into_iter`, and `iter_mut`
+
+- They all returns iterator, except the way the returns differ.
+
+- Here are the differences:
+
+  - `into_iter`: It yields any of `T`, `&T` or `&mut T`, depending on the context.
+  - `iter`: It yields `&T`.
+  - `iter_mut`: It yields `&mut T`.
+
+- For more details refer to this [stackoverflow answer](https://stackoverflow.com/questions/34733811/what-is-the-difference-between-iter-and-into-iter).
+
+#### Iterator, Enumerator, Map, Filter
 
 - Rust has the above functions inside the Iterator Trait.
 - It is also possible to use them together.
