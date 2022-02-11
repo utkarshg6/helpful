@@ -1149,7 +1149,18 @@ fn calculate_length(s: String) -> (String, usize) {
 
 - A _struct_, or structure, is a **custom data type** that lets you name and package together multiple related values that make up a meaningful group.
 - It is used to just define the data attributes as we do in Object Oriented Programming Languages.
-- Functions defined for structs are called _associated functions_ or _methods_.
+- There are three types of Structs:
+  1. Structs with Named Fields
+  2. Tuple Structs
+  3. Unit Structs
+
+#### Associated Functions and Methods
+
+- Functions defined for structs using the `impl` keyowrd are called _associated functions_.
+- The associated functions which accepts `self` as it's first argument are called _methods_.
+
+#### Structs with Named Fields
+
 - In structs, we name each piece of data, so it's clear what they mean. This name and data type pair are called _fields_.
 
 - Struct definition:
@@ -1197,17 +1208,18 @@ fn calculate_length(s: String) -> (String, usize) {
 - The struct update syntax (`..`), or spread operator in JS:
 
   ```rust
-  let user2 = User {
-      email: String::from("another@example.com"),
-      ..user1
-  };
-
-  // The longer version of above exmple is
+  // Initially
   let user2 = User {
       active: user1.active,
       username: user1.username,
       email: String::from("another@example.com"),
       sign_in_count: user1.sign_in_count,
+  };
+
+  // After using the struct update syntax (..)
+  let user2 = User {
+      email: String::from("another@example.com"),
+      ..user1
   };
   ```
 
@@ -1261,12 +1273,21 @@ fn calculate_length(s: String) -> (String, usize) {
   let origin = Point(0, 0, 0);
   ```
 
-- Unit-Like Structs Without Any Fields (they act like `()`):
+- To access their types, we use the `.` operator followed by the number of this argumnet.
 
   ```rust
-  // Useful when we want to implement a trait
-  // on some type but don’t have any data that
-  // you want to store in the type itself.
+  let color = Color(10, 25, 16);
+  let red = color.0;
+  let green = color.1;
+  let blue = color.2;
+  ```
+
+#### Unit Structs
+
+- They are structs without Any Fields (they act like `()`).
+- They are Useful when we want to implement a trait on some type but don’t have any data that you want to store in the type itself.
+
+  ```rust
   struct AlwaysEqual;
 
   let subject = AlwaysEqual;
@@ -1435,7 +1456,7 @@ p1.distance(&p2);
 
 - All the functions defined under `impl` are associated functions.
 - Methods are associated functions which has `self` as an argument and we use `.` operator to access it.
-- It is possible to define associated functions without passing `self` as the **first** argument, these functions are accessed through `::` syntax.
+- It is possible to define associated functions without passing `self` as the **first** argument, these functions are accessed through `::` operator.
 - Here's an example:
 
   ```rust
@@ -2213,13 +2234,6 @@ mod my_cool_module {
 - The possible values of an enum are called variants.
 - Enums also work well with match and other control flow operators to help you express intent in your Rust programs.
 
-### structs
-
-- structs are same as classes in python.
-- It is often useful to group a collection of items together, and handle those groups as units. In Rust, we call such a group a struct, and each item one of the struct's fields.
-- A struct defines the general set of fields available, but a particular example of a struct is called an instance.
-- Structs come in three flavors: structs with named fields, tuple structs, and unit structs.
-
 ### crates
 
 - In rust, packages are called crates.
@@ -2298,31 +2312,6 @@ mod tuple {
 fn main() {
   let _my_tuple_struct = tuple::TupleStruct(123, -321);
 }
-```
-
-### The Spread Operator (..)
-
-- Creating Instances From Other Instances With Struct Update Syntax.
-- It’s often useful to create a new instance of a struct that uses most of an old instance’s values but changes some. You can do this using _struct update syntax_.
-
-- Initially:
-
-```rust
-    let user2 = User {
-        active: user1.active,
-        username: user1.username,
-        email: String::from("another@example.com"),
-        sign_in_count: user1.sign_in_count,
-    };
-```
-
-- After:
-
-```rust
-    let user2 = User {
-        email: String::from("another@example.com"),
-        ..user1
-    };
 ```
 
 ### Iterators
