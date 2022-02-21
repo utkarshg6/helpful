@@ -1861,6 +1861,49 @@ fn main() {
       fn remove_fancy_hat() {}
   ```
 
+#### The `if let` syntax
+
+- It is used in case you want to consider only particular case of an enum.
+- For example, if you want to consider only the `Some` variant of an enum `Option<>`, you may prefer to use the `if let` syntax instead of `match`:
+
+  ```rust
+  // The older approach using the match syntax
+  let config_max = Some(3u8);
+  match config_max {
+      Some(max) => println!("The maximum is configured to be {}", max),
+      _ => (), // This line seems redundant
+  }
+
+  // More concise approach with if let
+  let config_max = Some(3u8);
+  if let Some(max) = config_max {
+      println!("The maximum is configured to be {}", max);
+  }
+  ```
+
+- The `if let` accepts a pattern (consider `Some(max)`) and an expression (consider `config_max`) seperated by and `=` sign.
+- Before using `if let` please make sure whether gaining conciseness is an appropriate trade-off for losing exhaustive checking.
+- This approach is not exhaustive in sense that it only considers one pattern and ignores other unlike the `match` syntax.
+
+- It is possible to use `else` with `if let`:
+
+```rust
+// In this problem we are counting the coins that aren't quarter
+let mut count = 0;
+match coin {
+    Coin::Quarter(state) => println!("State quarter from {:?}!", state),
+    _ => count += 1,
+}
+
+// Another possible approach with if let and else
+let mut count = 0;
+if let Coin::Quarter(state) = coin {
+    println!("State quarter from {:?}!", state);
+} else {
+    count += 1;
+}
+```
+
 ### Macros
 
 - Macros contain an `!` mark. For example, `println!()`.
