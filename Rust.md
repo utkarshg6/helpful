@@ -1904,6 +1904,56 @@ if let Coin::Quarter(state) = coin {
 }
 ```
 
+### Project Structuring
+
+- The Rust's _module system_ includes:
+  - **Packages:** A Cargo feature that lets you build, test, and share crates
+  - **Crates:** A tree of modules that produces a library or executable
+  - **Modules** and **use:** Let you control the organization, scope, and privacy of paths
+  - **Paths:** A way of naming an item, such as a struct, function, or module
+- Once you’ve implemented an operation, other code can call that code via the code’s public interface without knowing how the implementation works.
+- The way you write code defines which parts are public for other code to use and which parts are private.
+  - `private` - No exteranl code can call this code directly
+  - `public` - External code can call this code directly
+
+#### Package
+
+- When we run the command `cargo new` it creates the package.
+- A package contains a _Cargo.toml_ file that describes how to build those crates.
+- A package can contain **at most one** _library_ crate. It can contain **as many** _binary_ crates as you’d like, but it must contain at least one crate (either library or binary).
+- As a package grows, you can extract parts into separate crates that become external dependencies.
+
+#### Crates
+
+- A crate is a binary or library.
+- The _crate root_ is a source file that the Rust compiler starts from and makes up the root module of your crate.
+- Cargo follows a convention that _src/main.rs_ is the crate root of a **binary** crate with the same name as the package.
+- Similarly, _src/lib.rs_ is the crate root of a **library** crate with the same name as the package.
+- Cargo passes the crate root files to rustc to build the library or binary.
+- A crate’s functionality is namespaced in its own scope, it means we can import another crate let's say `rand` which has a trait named `Rng`, and still create a new struct named `Rng` in our project's crate. The `rustc` will never confuse between the two and we can access the `rand`'s components as `rand::Rng`.
+
+#### Modules and `use`
+
+- Modules are used to structure code inside a crate.
+- It is also used to provide privacy to your code.
+  - `private` - Exteranl code outside that module can not call this code directly
+  - `public` - External code outside that module can call this code directly
+- By using modules, we can group related definitions together and name why they’re related.
+- The benefit it'll provide you is that other programmers reading your code can easily find the code they are searching for because then they'll navigate through groups rather than each function definition. Also, they'll add new code in the right module.
+- The contents of the files _src/main.rs_ and _src/lib.rs_ (these files are also referred as crate roots) form a module named `crate` at the root of the crate’s module structure, known as the _module tree_.
+
+  ```zsh
+  crate                                 // An implicit module, definitely not named by you
+   └── front_of_house                   // Main Module inside lib.rs
+       ├── hosting                      // Submodule
+       │   ├── add_to_waitlist
+       │   └── seat_at_table
+       └── serving                      // Submodule
+           ├── take_order
+           ├── serve_order
+           └── take_payment
+  ```
+
 ### Macros
 
 - Macros contain an `!` mark. For example, `println!()`.
