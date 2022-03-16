@@ -2329,6 +2329,157 @@ if let Coin::Quarter(state) = coin {
       ];
   ```
 
+#### Strings and UTF-8 encoding
+
+- Characters are represented by single inverted commas, and has `4 bytes` of storage. For Example, `'😀'`.
+- String is not a collection of characters but collections of bytes.
+- Rust has only one string type in the core language, which is the string slice `str` that is usually seen in its borrowed form `&str`.
+- String Slices are the references to some UTF-8 data stored somewhere else.
+- String Literals are string slices when stored in program's binary.
+- The `String` type, which is provided by Rust’s standard library rather than coded into the core language, is a growable, mutable, owned, UTF-8 encoded string type.
+- When Rustaceans, call "string in rust", they collectively mean:
+  - `String`
+  - `&str`
+- Both `String` and `&str` are UTF-8 encoded.
+- Creating the `String` type:
+
+  ```rust
+  let mut s = String::new();
+  ```
+
+- To create a `String` from some starting string:
+
+  ```rust
+  let s = "initial contents".to_string(); // This fn can be used on any type that implements Display trait
+  let s = String::from("initial contents");
+  ```
+
+- It is possible to store any properly encoded data:
+
+  ```rust
+  let hello = String::from("नमस्ते");
+  let hello = String::from("안녕하세요");
+  let hello = String::from("Здравствуйте");
+  ```
+
+- Updating the String:
+
+  ```rust
+  let mut s = String::from("foo");
+  s.push_str("bar"); // It takes string slice, hence doesn't takes ownership
+  s.push('!'); // This fn only takes character as argument.
+  // s will become "foobar!"
+  ```
+
+- Concatenating two strings with the `+` operator:
+
+  ```rust
+  // '+' is a replacement of - fn add(self, s: &str) -> String {
+  let s1 = String::from("Hello, ");
+  let s2 = String::from("world!");
+  let s3 = s1 + &s2; // note s1 has been moved here and can no longer be used
+  ```
+
+Note: In Rust, if we provide `&str`, as a function's argument, it can accept both `&String` and `&str`. Rust uses a deref coercion, which here turns `&s2` into `&s2[..]`.
+
+- Combining multiple strings or formatting them:
+
+  ```rust
+  let s1 = String::from("tic");
+  let s2 = String::from("tac");
+  let s3 = String::from("toe");
+
+  // Method 1
+  let s = s1 + "-" + &s2 + "-" + &s3;
+
+  // Method 2
+  let s = format!("{}-{}-{}", s1, s2, s3); // It works like println!() but returns String
+  ```
+
+- Indexing into Strings is not possible and results in error:
+
+  ```rust
+  // FAIL: Strings can be indexed in Rust
+  let s1 = String::from("hello");
+  let h = s1[0]; // Won't work
+  ```
+
+- How values are stored in string.
+
+  - String is just a wrapper over `Vec<u8>`, this means `1 byte` of space for each element in the vector. Hence, if we want to save special charcters, then it may take more than one element to store the values.
+  - Let's consider following examples:
+
+    ```rust
+    let hello = String::from("Hola"); // Each character will take 1 byte of storage
+    let hello = String::from("Здравствуйте"); // Each character will take 2 bytes of storage
+    ```
+
+  - Let's understand using the Hindi word `“नमस्ते”`:
+
+    - As Bytes (the way `String` does using `u8` which ranges from `0` to `255`):
+
+      ```rust
+      [224, 164, 168, 224, 164, 174, 224, 164, 184, 224, 165, 141, 224, 164, 164,
+      224, 165, 135]
+      ```
+
+    - As Unicode Scalar Values (the way `char` does):
+
+      ```rust
+      ['न', 'म', 'स', '्', 'त', 'े']
+      ```
+
+    - As Grapheme Clusters (the way a Hindi speaker might do):
+
+      ```rust
+      ["न", "म", "स्", "ते"]
+      ```
+
+- Slicing Strings:
+
+  - You need to provide the range of `bytes` to be sliced out of String. Again, not characters but bytes.
+
+    ```rust
+    let hello = "Здравствуйте"; // Each character here is composed of 2 bytes
+
+    let s = &hello[0..4]; // It'll save first 4 bytes, `Зд`
+
+    let will_panic = &hello[0..1]; // It'll panic, as if invalid index was accessed in the vector.
+    ```
+
+- Iterating over strings:
+
+  - You can iterate over the unicode scalar values or what `chars` might store:
+
+    ```rust
+    for c in "नमस्ते".chars() {
+        println!("{}", c);
+    }
+
+    // This is what it'll print
+    न
+    म
+    स
+    ्
+    त
+    े
+    ```
+
+  - You can iterate over bytes also, the way `String` is stored in `Vec<u8>` format:
+
+    ```rust
+    for b in "नमस्ते".bytes() {
+        println!("{}", b);
+    }
+
+    // The output will be like
+    224
+    164
+    // --snip--
+    165
+    135
+    ```
+
 ### Macros
 
 - Macros contain an `!` mark. For example, `println!()`.
