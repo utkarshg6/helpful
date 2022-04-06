@@ -3149,6 +3149,89 @@ Note: You can only use the `?` operator on a `Result` in a function that returns
 
 Note: Calling the default implementation from an overriding implementation won't work.
 
+#### Traits as Paramteres
+
+- You can define the `type` of parameters of a function as a trait.
+- Then, you can pass any type that implements the specified trait.
+- Here's the syntax for that:
+
+  ```rust
+  pub fn notify(item: &impl Summary) {
+      println!("Breaking news! {}", item.summarize());
+  }
+  ```
+
+- Code that calls the function with any other type, such as a `String` or an `i32`, won’t compile because those types don’t implement Summary.
+
+- The above syntax is the simpler version of this original syntax, known as "_trait bound syntax_":
+
+  ```rust
+  pub fn notify<T: Summary>(item: &T) {
+      println!("Breaking news! {}", item.summarize());
+  }
+  ```
+
+- It is possible to use this syntax like this:
+
+  ```rust
+  pub fn notify<T: Summary>(item1: &T, item2: &T) {
+  ```
+
+- It is possible to define multiple trait bounds for a single parameter:
+
+  ```rust
+  // In both these cases, item must be a type that 
+  // implements both traits Summary and Display
+
+  // Method 1 ->
+  pub fn notify(item: &(impl Summary + Display)) {
+
+  // Method 2 ->
+  pub fn notify<T: Summary + Display>(item: &T) {
+  ```
+
+- You can use `where` clause to declutter the signature. For Example:
+
+  ```rust
+  fn some_function<T, U>(t: &T, u: &U) -> i32
+      where T: Display + Clone,
+            U: Clone + Debug
+  {
+  ```
+
+- Similar to function parameters, it is possible to return types that implements traits:
+
+  ```rust
+  // Signature says that it'll return any type that implements the trait Summary
+  fn returns_summarizable() -> impl Summary {
+      // Tweet is some type that implements Summary
+      Tweet {
+          username: String::from("horse_ebooks"),
+          content: String::from(
+              "of course, as you probably already know, people",
+          ),
+          reply: false,
+          retweet: false,
+      }
+  }
+  ```
+
+- However, you can only use `impl Trait` if you’re returning a single type. For example:
+
+  ```rust
+  // FAIL: Either return NewsArticle or Tweet (only one type that implements Summary)
+  fn returns_summarizable(switch: bool) -> impl Summary {
+      if switch {
+          NewsArticle {
+            ...
+          }
+      } else {
+          Tweet {
+            ...
+          }
+      }
+  }
+  ```
 
 ### Macros
 
