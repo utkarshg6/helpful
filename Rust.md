@@ -3180,7 +3180,7 @@ Note: Calling the default implementation from an overriding implementation won't
 - It is possible to define multiple trait bounds for a single parameter:
 
   ```rust
-  // In both these cases, item must be a type that 
+  // In both these cases, item must be a type that
   // implements both traits Summary and Display
 
   // Method 1 ->
@@ -3228,6 +3228,64 @@ Note: Calling the default implementation from an overriding implementation won't
       } else {
           Tweet {
             ...
+          }
+      }
+  }
+  ```
+
+- Finding the largest character of an array of integer or an array of characters using generics and traits:
+
+  ```rust
+  // Generic is used as we defined T in the signature, allowing any type to pass
+  // Trait bound is specified as PartialOrd is added to the signature, allowing any type that allows comparison, and copy (both i32 and char do)
+  fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {
+      let mut largest = list[0];
+
+      for &item in list {
+          if item > largest {
+              largest = item;
+          }
+      }
+
+      largest
+  }
+
+  fn main() {
+      let number_list = vec![34, 50, 25, 100, 65];
+
+      let result = largest(&number_list);
+      println!("The largest number is {}", result);
+
+      let char_list = vec!['y', 'm', 'a', 'q'];
+
+      let result = largest(&char_list);
+      println!("The largest char is {}", result);
+  }
+  ```
+
+- Using Trait Bounds to Conditionally Implement Methods:
+
+  ```rust
+  use std::fmt::Display;
+
+  struct Pair<T> {
+      x: T,
+      y: T,
+  }
+
+  impl<T> Pair<T> {
+      fn new(x: T, y: T) -> Self {
+          Self { x, y }
+      }
+  }
+
+  // cmp_display will only run on types bounded by traits Display and PartialOrd, hence works conditionally
+  impl<T: Display + PartialOrd> Pair<T> {
+      fn cmp_display(&self) {
+          if self.x >= self.y {
+              println!("The largest member is x = {}", self.x);
+          } else {
+              println!("The largest member is y = {}", self.y);
           }
       }
   }
