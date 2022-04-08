@@ -3291,6 +3291,115 @@ Note: Calling the default implementation from an overriding implementation won't
   }
   ```
 
+### Lifetimes
+
+- Lifetime is a way to specify how long the multiple references will live. So, it doesn't make sense to add lifetime to just one reference, they must be multiple.
+- Ways to add lifetime specifiers:
+
+  ```rust
+  &i32        // a reference
+  &'a i32     // a reference with an explicit lifetime
+  &'a mut i32 // a mutable reference with an explicit lifetime
+  ```
+
+- For example, let’s say we have a function with the parameter `first` that is a reference to an `i32` with lifetime `'a`. The function also has another parameter named `second` that is another reference to an `i32` that also has the lifetime `'a`. The lifetime annotations indicate that the references `first` and `second` must both live as long as that generic lifetime.
+
+- _Every reference_ in Rust has a _lifetime_.
+- Here's an exmple of dangling reference:
+
+  ```rust
+  // FAIL: Rust prevents dangling references
+      {
+          let r;                // ---------+-- 'a
+                                //          |
+          {                     //          |
+              let x = 5;        // -+-- 'b  |
+              r = &x;           //  |       |
+          }                     // -+       | <- x dies but r stores reference of x, hence r stores a dangling referece
+                                //          |
+          println!("r: {}", r); //          |
+      }                         // ---------+
+  ```
+
+- Rust won't compile the above code, as it uses a `borrow checker`, to verify whether a reference or borrow is valid or not.
+- We may fix it by fixing the lives of variables by declaring them at different places:
+
+  ```rust
+      {
+          let x = 5;            // ----------+-- 'b
+                                //           |
+          let r = &x;           // --+-- 'a  |
+                                //   |       |
+          println!("r: {}", r); //   |       |
+                                // --+       |
+      }                         // ----------+
+  ```
+
+- This code will not compile, it'll require lifetime specifiers:
+
+  ```rust
+  // FAIL: Rust can’t tell whether the reference being returned refers to x or y.
+  fn longest(x: &str, y: &str) -> &str {
+      if x.len() > y.len() {
+          x
+      } else {
+          y
+      }
+  }
+  ```
+
+  ```rust
+  // Compiler will ask us to rewrite the signature like this
+  fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+  ```
+
+- The reason why Rust asks us to specify the lifetimes are due to these reasons:
+
+  - We don’t know whether the if case or the else case will execute.
+  - We also don’t know the concrete lifetimes of the references that will be passed in.
+
+- When we add the lifetime specifiers as specified by the compiler, it means, the generic lifetime `'a` will get the concrete lifetime that is equal to the smaller of the lifetimes of `x` and `y` (the variables passed in).
+
+Note: Remember, when we specify the lifetime parameters in this function signature, we’re not changing the lifetimes of any values passed in or returned. Rather, we’re specifying that the borrow checker should reject any values that don’t adhere to these constraints. Note that the longest function doesn’t need to know exactly how long `x` and `y` will live, only that some scope can be substituted for `'a` that will satisfy this signature.
+
+- How borrow checker will allow:
+
+```rust
+// Works: result is valid until the inner scope ends, string2 and string1 are valid too, hence borrow checker allows
+fn main() {
+    let string1 = String::from("long string is long");
+
+    {
+        let string2 = String::from("xyz");
+        let result = longest(string1.as_str(), string2.as_str());
+        println!("The longest string is {}", result);
+    }
+}
+
+// FAILS: The way we've specified lifetimes, result should have a shorter lifetime, equivalent to that of string2. Since, the code doesn't follows the rule, it fails.
+fn main() {
+    let string1 = String::from("long string is long");
+    let result;
+    {
+        let string2 = String::from("xyz");
+        result = longest(string1.as_str(), string2.as_str());
+    }
+    println!("The longest string is {}", result);
+}
+```
+
+- In the second case, this is the error that the compiler will throw:
+
+```zsh
+  |
+6 |         result = longest(string1.as_str(), string2.as_str());
+  |                                            ^^^^^^^^^^^^^^^^ borrowed value does not live long enough
+7 |     }
+  |     - `string2` dropped here while still borrowed
+8 |     println!("The longest string is {}", result);
+  |                                          ------ borrow later used here
+```
+
 ### Macros
 
 - Macros contain an `!` mark. For example, `println!()`.
