@@ -1173,6 +1173,17 @@ fn calculate_length(s: String) -> (String, usize) {
   }
   ```
 
+- Read command line arguments and store them into a vector.
+
+  ```rust
+  use std::env;
+
+  fn main() {
+      let args: Vec<String> = env::args().collect();
+      println!("{:?}", args);
+  }
+  ```
+
 ## Concepts
 
 ### Structs
@@ -2237,6 +2248,10 @@ if let Coin::Quarter(state) = coin {
   // Filename: src/front_of_house/hosting.rs
   pub fn add_to_waitlist() {}
   ```
+
+### Refactoring Guides
+
+This pattern is about separating concerns: `main.rs` handles running the program, and `lib.rs` handles all the logic of the task at hand. Because you can’t test the main function directly, this structure lets you test all of your program’s logic by moving it into functions in `lib.rs`. The only code that remains in main.rs will be small enough to verify its correctness by reading it.
 
 ### Common Collections
 
@@ -4828,6 +4843,15 @@ mod tests {
   1. Unit Tests
   2. Integration Tests
   3. Doc Tests
+
+### Test Driven Development
+
+This software development technique follows these steps:
+
+1. Write a test that fails and run it to make sure it fails for the reason you expect.
+2. Write or modify just enough code to make the new test pass.
+3. Refactor the code you just added or changed and make sure the tests continue to pass.
+4. Repeat from step 1!
 
 ## Editions in Rust
 
