@@ -3721,6 +3721,70 @@ where
   let weight: f32 = input.trim().parse().unwrap();
   ```
 
+## Advanced Concepts
+
+### Functional Language Features
+
+- Programming in a functional style often includes using functions as values by passing them in arguments, returning them from other functions, assigning them to variables for later execution, and so forth.
+- Specifically, functional programming includes:
+  - _Closures_: A function-like construct you can store in a variable.
+  - _Iterators_: A way of processing a series of elements.
+
+#### Closures
+
+- They are "Anonymous Functions that Can Capture Their Environment".
+- An example of closure:
+
+  ```rust
+  let expensive_closure = |num| {
+      println!("calculating slowly...");
+      thread::sleep(Duration::from_secs(2));
+      num
+  };
+  ```
+
+- Why closures don't require type annotations, but functions (`fn`) do?
+
+  - Type annotations are required on functions because they’re part of an explicit interface exposed to your users. Defining this interface rigidly is important for ensuring that everyone agrees on what types of values a function uses and returns.
+  - But closures aren’t used in an exposed interface like this: they’re stored in variables and used without naming them and exposing them to users of our library.
+
+- In case, we still want to explicitly define type annotations, we can do it by:
+
+  ```rust
+  let expensive_closure = |num: u32| -> u32 {
+      println!("calculating slowly...");
+      thread::sleep(Duration::from_secs(2));
+      num
+  };
+  ```
+
+- Comparisons for Functions and closures syntax:
+
+  ```rust
+  fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+  let add_one_v2 = |x: u32| -> u32 { x + 1 };
+  let add_one_v3 = |x|             { x + 1 };
+  let add_one_v4 = |x|               x + 1  ;
+  ```
+
+- Closures will always have only one concrete type:
+
+  ```rust
+  // FAIL: Closure inferred two different types of x, which is against the rules
+  let example_closure = |x| x;
+
+  let s = example_closure(String::from("hello"));
+  let n = example_closure(5);
+  ```
+
+- Performing _memoization_ or _lazy evaluation_:
+  - We can create a struct that will hold the closure and the resulting value of calling the closure.
+  - The struct will execute the closure only if we need the resulting value, and it will cache the resulting value so the rest of our code doesn’t have to be responsible for saving and reusing the result.
+  - All closures implement at least one of the traits: `Fn`, `FnMut`, or `FnOnce`.
+  - 
+
+
+
 ## OOPS
 
 ### Instance
