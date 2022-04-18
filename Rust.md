@@ -3778,12 +3778,125 @@ where
   ```
 
 - Performing _memoization_ or _lazy evaluation_:
+
   - We can create a struct that will hold the closure and the resulting value of calling the closure.
   - The struct will execute the closure only if we need the resulting value, and it will cache the resulting value so the rest of our code doesn’t have to be responsible for saving and reusing the result.
   - All closures implement at least one of the traits: `Fn`, `FnMut`, or `FnOnce`.
-  - 
+  - Using this information, we can create a `Cacher`
 
+    ```rust
+    // Cacher will store a closure inside calculation
+    // and the computed value inside value
+    struct Cacher<T>
+    where
+        T: Fn(u32) -> u32,
+    {
+        calculation: T,
+        value: Option<u32>,
+    }
+    ```
 
+  - The use of the memoization is that, we can store the closure, that contains computation which takes very long time to finish. Then we can save it's computed value inside the struct, so that we can reuse to computation (thereby preventing expensive computation again and again), as well as update the computed value whenever necessary.
+  - We'll need to write an implementation block to make the `Cacher` easier to use:
+
+    ```rust
+    impl<T> Cacher<T>
+    where
+        T: Fn(u32) -> u32,
+    {
+        fn new(calculation: T) -> Cacher<T> {
+            Cacher {
+                calculation,
+                value: None
+            }
+        }
+
+        fn value(&mut self, arg: u32) -> u32 {
+            match self.value {
+                Some(v) => v,
+                None => {
+                    let v = (self.calculation)(arg);
+                    self.value = v;
+                    v
+                }
+            }
+        }
+    }
+    ```
+
+  - The only limitation of this `Cacher` is that it assumes that, it'll only receive one value, that means even if we call the `value()` function multiple with different arguments, it'll still return the same value every time and that value will be the computed value when the closure was called for the first time. Here's the explanation:
+
+    ```rust
+    let mut c = Cacher::new(|a| a);
+
+    let v1 = c.value(1); // v1 = 1
+    let v2 = c.value(2); // v2 = 1
+    let v3 = c.value(3); // v3 = 1
+    ```
+
+  - So, here is a better version of the above cacher that can memorize all the arguments and their computed value inside a HashMap, which is also generic. You may refer it's implementation over [here](https://gist.github.com/utkarshg6/c8a5cb39ef89b8f16fcce3098754c001).
+
+- Capturing the Environmet with closures:
+
+  - You can't don the following thing using simple functions:
+
+    ```rust
+    // FAIL: Functions can't capture their environment, hence x shouldn't live inside the function
+    fn main() {
+        let x = 4;
+
+        fn equal_to_x(z: i32) -> bool {
+            z == x
+        }
+
+        let y = 4;
+
+        assert!(equal_to_x(y));
+    }
+    ```
+
+  - But, you can easliy do this using closure:
+
+    ```rust
+    fn main() {
+        let x = 4;
+
+        let equal_to_x = |z| z == x;
+
+        let y = 4;
+
+        assert!(equal_to_x(y));
+    }
+    ```
+
+  - Closures can capture values from their environment in three ways, which directly map to the three ways a function can take a parameter: taking ownership, borrowing mutably, and borrowing immutably. These are encoded in the three Fn traits as follows:
+
+    - `FnOnce` consumes the variables it captures from its enclosing scope, known as the closure’s environment. To consume the captured variables, the closure must take ownership of these variables and move them into the closure when it is defined. The Once part of the name represents the fact that the closure can’t take ownership of the same variables more than once, so it can be called only once.
+    - `FnMut` can change the environment because it mutably borrows values.
+    - `Fn` borrows values from the environment immutably.
+
+  - When you create a closure, Rust infers which trait to use based on how the closure uses the values from the environment. All closures implement `FnOnce` because they can all be called at least once. Closures that don’t move the captured variables also implement `FnMut`, and closures that don’t need mutable access to the captured variables also implement `Fn`. In Listing 13-12, the equal_to_x closure borrows x immutably (so equal_to_x has the Fn trait) because the body of the closure only needs to read the value in x.
+
+  - If you want to force the closure to take ownership of the values it uses in the environment, you can use the `move` keyword before the parameter list. This technique is mostly useful when passing a closure to a new thread to move the data so it’s owned by the new thread. The `move` closures may still implement Fn or FnMut, even though they capture variables by move. This is because the traits implemented by a closure type are determined by what the closure does with captured values, not how it captures them. The move keyword only specifies the latter.
+
+  - An example of `move`:
+
+    ```rust
+    // FAIL: We tried to print x even though it is moved inside closure
+    fn main() {
+        let x = vec![1, 2, 3];
+
+        let equal_to_x = move |z| z == x;
+
+        println!("can't use x here: {:?}", x);
+
+        let y = vec![1, 2, 3];
+
+        assert!(equal_to_x(y));
+    }
+    ```
+
+  - Most of the time when specifying one of the `Fn` trait bounds, you can start with `Fn` and the compiler will tell you if you need `FnMut` or `FnOnce` based on what happens in the closure body.
 
 ## OOPS
 
@@ -3794,6 +3907,8 @@ where
   ```rust
   let server = Server::new("127.0.0.1:8080");
   ```
+
+````
 
 - Calling a function of an instance
 
@@ -5111,3 +5226,4 @@ For Windows:
   ```
 
 For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
+````
