@@ -3725,6 +3725,8 @@ where
 
 ### Functional Language Features
 
+Fun Fact: The implementations of closures and iterators are such that runtime performance is not affected. It means as if you've written to an optimized low level code, like in Assembly Language. This is part of Rust’s goal to strive to provide _zero-cost abstractions_.
+
 - Programming in a functional style often includes using functions as values by passing them in arguments, returning them from other functions, assigning them to variables for later execution, and so forth.
 - Specifically, functional programming includes:
   - _Closures_: A function-like construct you can store in a variable.
@@ -3928,6 +3930,7 @@ where
   ```
 
 - Why is it required to use `mut` when using `next()`, but not when using `for` loop?
+
   - `next()` - Each call to `next` eats up an item from the iterator. Hence, we need to define it as `mut` to be able to do that.
   - `for` - The loop takes ownership of the iterator and made it mutable behind the scenes. Hence, we don't need to use `mut` there.
 
@@ -3943,37 +3946,38 @@ where
 
 - `Consuming Adaptors`: Some methods inside `Iterator` trait uses `next()`. It means those functions will also eat away the iterator, just like how `next()` does. Here's an example:
 
-    ```rust
-    let v1 = vec![1, 2, 3];
+  ```rust
+  let v1 = vec![1, 2, 3];
 
-    let v1_iter = v1.iter();
+  let v1_iter = v1.iter();
 
-    let total: i32 = v1_iter.sum(); // sum() uses the next() and hence will eat away the iterator
-    ```
+  let total: i32 = v1_iter.sum(); // sum() uses the next() and hence will eat away the iterator
+  ```
 
 - `Iterator Adaptors`: Some methods inside `Iterator` allows you to change iterators into different kinds of iterators. It is also possible to use `Iterator`, `Enumerator`, `Map`, and `Filter` together. Rust has these functions inside the Iterator Trait.
 
-    ```rust
-    let v1: Vec<u32> = vec![0, 1, 2, 3, 4, 5];
-    let iterator = v1.iter()
-                     .enumerate()
-                     .filter(|(i, val)| i % 2 == 0)
-                     .map(|(i, val)| val); // On it's own it won't do anything, because iterators are lazy
-    
-    // You can either print them one by one using for loop (remember it'll consume the iterator)
-    for val in iterator {
-        println!("{}", val);
-    }
+  ```rust
+  let v1: Vec<u32> = vec![0, 1, 2, 3, 4, 5];
+  let iterator = v1.iter()
+                   .enumerate()
+                   .filter(|(i, val)| i % 2 == 0)
+                   .map(|(i, val)| val); // On it's own it won't do anything, because iterators are lazy
 
-    // Or you can collect them inside a vector, make sure you explicitly specify the type (`Vec<_>`) too.
-    let new_vector: Vec<_> = iterator.collect();
-    println!("New Vector: {:?}")
-    ```
+  // You can either print them one by one using for loop (remember it'll consume the iterator)
+  for val in iterator {
+      println!("{}", val);
+  }
+
+  // Or you can collect them inside a vector, make sure you explicitly specify the type (`Vec<_>`) too.
+  let new_vector: Vec<_> = iterator.collect();
+  println!("New Vector: {:?}")
+  ```
 
 - Creating your own iterator:
+
   - You'll need to implement `Iterator` trait on your type.
   - You'll only need to define one function, that is `next()`, it'll be sufficient.
-  
+
     ```rust
     struct Counter {
         count: u32,
@@ -3989,7 +3993,7 @@ where
 
     impl Iterator for Counter {
         type Item = u32;
-        
+
         fn next(&mut self) -> Option<Self::Item> {
             if self.count < 5 {
                 self.count += 1;
@@ -4014,6 +4018,17 @@ where
             .sum(); // 18
     }
     ```
+
+- Which is faster, `for` loop or `iterator adapters`?
+
+  - Here are the benchmarks:
+
+    ```zsh
+    test bench_search_for  ... bench:  19,620,300 ns/iter (+/- 915,700)
+    test bench_search_iter ... bench:  19,234,900 ns/iter (+/- 657,200)
+    ```
+
+  - Iterators, although a high-level abstraction, get compiled down to roughly the same code as if you’d written the lower-level code yourself. Iterators are one of Rust’s `zero-cost abstractions`, which means that using the abstraction imposes no additional runtime overhead.
 
 ## OOPS
 
@@ -5315,4 +5330,7 @@ For Windows:
   ```
 
 For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
-````
+
+```
+
+```
