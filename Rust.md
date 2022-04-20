@@ -3898,6 +3898,123 @@ where
 
   - Most of the time when specifying one of the `Fn` trait bounds, you can start with `Fn` and the compiler will tell you if you need `FnMut` or `FnOnce` based on what happens in the closure body.
 
+#### Iterators
+
+- Iterators are lazy in rust, meaning they have no effect until you call methods that consume the iterator to use it up.
+
+  ```rust
+  let v1 = vec![1, 2, 3];
+
+  let v1_iter = v1.iter(); // It won't do anything useful until called upon
+
+  for val in v1_iter { // Now, the iterator is called upon and used
+      println!("Got: {}", val);
+  }
+  ```
+
+- To just get the next element stored in iterator:
+
+  ```rust
+  let v1 = vec![1, 2, 3];
+
+  // Calling the next() method changes the state of iterator,
+  // hence we'll need to use mut in this case
+  let mut v1_iter = v1.iter();
+
+  assert_eq!(v1_iter.next(), Some(&1));
+  assert_eq!(v1_iter.next(), Some(&2));
+  assert_eq!(v1_iter.next(), Some(&3));
+  assert_eq!(v1_iter.next(), None);
+  ```
+
+- Why is it required to use `mut` when using `next()`, but not when using `for` loop?
+  - `next()` - Each call to `next` eats up an item from the iterator. Hence, we need to define it as `mut` to be able to do that.
+  - `for` - The loop takes ownership of the iterator and made it mutable behind the scenes. Hence, we don't need to use `mut` there.
+
+- Difference between `iter`, `into_iter`, and `iter_mut`
+
+  - They all return iterator, except the way they return differs. Here are the differences:
+
+    - `into_iter`: It yields any of `T`, `&T` or `&mut T`, depending on the context.
+    - `iter`: It yields `&T`.
+    - `iter_mut`: It yields `&mut T`.
+
+  - For more details refer to this [stackoverflow answer](https://stackoverflow.com/questions/34733811/what-is-the-difference-between-iter-and-into-iter).
+
+- `Consuming Adaptors`: Some methods inside `Iterator` trait uses `next()`. It means those functions will also eat away the iterator, just like how `next()` does. Here's an example:
+
+    ```rust
+    let v1 = vec![1, 2, 3];
+
+    let v1_iter = v1.iter();
+
+    let total: i32 = v1_iter.sum(); // sum() uses the next() and hence will eat away the iterator
+    ```
+
+- `Iterator Adaptors`: Some methods inside `Iterator` allows you to change iterators into different kinds of iterators. It is also possible to use `Iterator`, `Enumerator`, `Map`, and `Filter` together. Rust has these functions inside the Iterator Trait.
+
+    ```rust
+    let v1: Vec<u32> = vec![0, 1, 2, 3, 4, 5];
+    let iterator = v1.iter()
+                     .enumerate()
+                     .filter(|(i, val)| i % 2 == 0)
+                     .map(|(i, val)| val); // On it's own it won't do anything, because iterators are lazy
+    
+    // You can either print them one by one using for loop (remember it'll consume the iterator)
+    for val in iterator {
+        println!("{}", val);
+    }
+
+    // Or you can collect them inside a vector, make sure you explicitly specify the type (`Vec<_>`) too.
+    let new_vector: Vec<_> = iterator.collect();
+    println!("New Vector: {:?}")
+    ```
+
+- Creating your own iterator:
+  - You'll need to implement `Iterator` trait on your type.
+  - You'll only need to define one function, that is `next()`, it'll be sufficient.
+  
+    ```rust
+    struct Counter {
+        count: u32,
+    }
+
+    impl Counter {
+        fn new() -> Self {
+            Self {
+                count: 0,
+            }
+        }
+    }
+
+    impl Iterator for Counter {
+        type Item = u32;
+        
+        fn next(&mut self) -> Option<Self::Item> {
+            if self.count < 5 {
+                self.count += 1;
+                Some(self.count)
+            } else {
+                None
+            }
+        }
+    }
+
+    fn main() {
+        let counter = Counter::new();
+        for val in counter {
+            println!("{:?}", val);
+        }
+
+        // Since we have next() method we can use any default implementation of the Iterator trait
+        let sum: u32 = Counter::new()
+            .zip(Counter::new().skip(1)) // Skips first element only and generate pairs { (1,2) (2,3) (3,4) (4,5) } because (5,None) is ignored
+            .map(|(a, b)| a * b) // [2, 6, 12, 20]
+            .filter(|x| x % 3 == 0) // [6, 12]
+            .sum(); // 18
+    }
+    ```
+
 ## OOPS
 
 ### Instance
@@ -3907,8 +4024,6 @@ where
   ```rust
   let server = Server::new("127.0.0.1:8080");
   ```
-
-````
 
 - Calling a function of an instance
 
@@ -4561,32 +4676,6 @@ mod tuple {
 fn main() {
   let _my_tuple_struct = tuple::TupleStruct(123, -321);
 }
-```
-
-### Iterators
-
-#### Difference between `iter`, `into_iter`, and `iter_mut`
-
-- They all returns iterator, except the way the returns differ.
-
-- Here are the differences:
-
-  - `into_iter`: It yields any of `T`, `&T` or `&mut T`, depending on the context.
-  - `iter`: It yields `&T`.
-  - `iter_mut`: It yields `&mut T`.
-
-- For more details refer to this [stackoverflow answer](https://stackoverflow.com/questions/34733811/what-is-the-difference-between-iter-and-into-iter).
-
-#### Iterator, Enumerator, Map, Filter
-
-- Rust has the above functions inside the Iterator Trait.
-- It is also possible to use them together.
-
-```rust
-  let iterator = iter.enumerate()
-                     .filter(|(i, val)| i % 2 == 0)
-                     .map(|(i, val)| val)
-
 ```
 
 ### Adding elements with their frequency to a HashMap using entry
