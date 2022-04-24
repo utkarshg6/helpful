@@ -2249,6 +2249,171 @@ if let Coin::Quarter(state) = coin {
   pub fn add_to_waitlist() {}
   ```
 
+#### Re-exporting
+
+- You may use re-exporting, for making it easier to use your crate for other developers. It allows to use the structures directly intead of following the heirarchy in which the crate is designed.
+
+  - Without re-exporting:
+
+    - How structure looks:
+
+      ```rust
+      pub mod kinds {
+          pub enum PrimaryColor {
+            ...
+          }
+
+          pub enum SecondaryColor {
+            ...
+          }
+      }
+
+      pub mod utils {
+          use crate::kinds::*;
+
+          pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -> SecondaryColor {
+              ...
+          }
+      }
+      ```
+
+    - How others will be using it:
+
+      ```rust
+      use art::kinds::PrimaryColor;
+      use art::utils::mix;
+
+      fn main() {
+          let red = PrimaryColor::Red;
+          let yellow = PrimaryColor::Yellow;
+          mix(red, yellow);
+      }
+      ```
+
+  - With re-exporting:
+
+    - How structure looks:
+
+      ```rust
+      // Here we're re-exporting it for direct use
+      pub use self::kinds::PrimaryColor;
+      pub use self::kinds::SecondaryColor;
+      pub use self::utils::mix;
+
+      pub mod kinds {
+          ...
+      }
+
+      pub mod utils {
+          ...
+      }
+      ```
+
+    - How others will be using it:
+
+      ```rust
+      // Isn't it easier to import now?
+      use art::mix;
+      use art::PrimaryColor;
+
+      fn main() {
+        let red = PrimaryColor::Red;
+        let yellow = PrimaryColor::Yellow;
+        mix(red, yellow);
+      }
+      ```
+
+#### Workspaces
+
+- A `workspace` is a set of packages that share the same `Cargo.lock` and output directory.
+- You can build your workspace that looks like this:
+
+  ```zsh
+  add
+  ├── Cargo.lock
+  ├── Cargo.toml
+  ├── add_one
+  │   ├── Cargo.toml
+  │   └── src
+  │       └── lib.rs
+  ├── adder
+  │   ├── Cargo.toml
+  │   └── src
+  │       └── main.rs
+  └── target // Notice only one target directory
+  ```
+
+- The `cargo.toml` of `add` (the outer one) of the workspace will look like this:
+
+  ```toml
+  <!-- Filename: add/Cargo.toml -->
+  [workspace]
+
+  members = [
+      "adder",
+      "add_one",
+  ]
+  ```
+
+- The workspace has one target directory at the top level, the `adder` package doesn’t have its own `target` directory.
+- Even if we were to run `cargo build` from inside the `adder` directory, the compiled artifacts would still end up in `add/target` rather than `add/adder/target`.
+
+- The `cargo.toml` of `adder` will look like this:
+
+  ```toml
+  <!-- Filename: add/adder/Cargo.toml -->
+  [dependencies]
+  add_one = { path = "../add_one" }
+  ```
+
+- The `main.rs` in `adder` will look something like this:
+
+  ```rust
+  // Filename: add/adder/src/main.rs
+  use add_one;
+
+  fn main() {
+      let num = 10;
+      println!(
+          "Hello, world! {} plus one is {}!",
+          num,
+          add_one::add_one(num)
+      );
+  }
+  ```
+
+- To build the whole workspace, you may run this command from the `add` directory (the outer).
+
+  ```zsh
+  $ cargo build
+     Compiling add_one v0.1.0 (file:///projects/add/add_one)
+     Compiling adder v0.1.0 (file:///projects/add/adder)
+      Finished dev [unoptimized + debuginfo] target(s) in 0.68s
+  ```
+
+- To run a particular package you may run the following command:
+
+  ```zsh
+  $ cargo run -p adder
+      Finished dev [unoptimized + debuginfo] target(s) in 0.0s
+       Running `target/debug/adder`
+  Hello, world! 10 plus one is 11!
+  ```
+
+- All the dependencies in different packages will use the same version of the dependency. It is because the `cargo.toml` of the workspace will make only one entry of the dependency. It also saves space and makes all the package compatible with each other, since they'll be using the same version of the dependency.
+
+- To run all test:
+
+  ```zsh
+  cargo run test
+  ```
+
+- To run test in particular file:
+
+  ```zsh
+  cargo test -p add_one
+  ```
+
 ### Refactoring Guides
 
 This pattern is about separating concerns: `main.rs` handles running the program, and `lib.rs` handles all the logic of the task at hand. Because you can’t test the main function directly, this structure lets you test all of your program’s logic by moving it into functions in `lib.rs`. The only code that remains in main.rs will be small enough to verify its correctness by reading it.
@@ -5120,6 +5285,37 @@ mod tests {
 - Though, if a project contains both `src/lib.rs` and `sr/main.rs`, we can write integration tests for the important functionality inside `src/lib.rs` using the `use` keyword.
 - If the important functionality works, the small amount of code in the `src/main.rs` file will work as well, and that small amount of code doesn’t need to be tested.
 
+### Doc Tests
+
+- You can write doc tests above the item, using the `Examples` with the docs comment `///` like this:
+
+  ````rust
+  /// Adds one to the number given.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// let arg = 5;
+  /// let answer = my_crate::add_one(arg);
+  ///
+  /// assert_eq!(6, answer);
+  /// ```
+  pub fn add_one(x: i32) -> i32 {
+      x + 1
+  }
+  ````
+
+- Running `cargo test` will run the code examples in your documentation as tests! In case we change the function, the test will panic, and we'll require to update the docs to make it work.
+
+  ```zsh
+     Doc-tests my_crate
+
+  running 1 test
+  test src/lib.rs - add_one (line 5) ... ok
+
+  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+  ```
+
 ### Tests Output Log
 
 - The output logs section has three parts:
@@ -5242,6 +5438,52 @@ For Windows:
   ```
 
 - The names of a _type_ in rust uses CamelCase. For example, consider `T` in `Result<T>`.
+- Documentation Comments use `///`, and is converted to HTML, unlike simple comments `//`. So simply add the documentation above the items. [Learn more](#documentation).
+
+### Documentation
+
+- Always remember that, _programmers are interested in knowing how to use your crate as opposed to how your crate is implemented_.
+- You'll be using `///` for documentation. Notice that you'll need to add docs comment above your item, not inside the `{}`. Using this`///`, we're documenting the item that follows it.
+
+  ````rust
+  /// Adds one to the number given.
+  ///
+  /// # Examples
+  ///
+  /// ```
+  /// let arg = 5;
+  /// let answer = my_crate::add_one(arg);
+  ///
+  /// assert_eq!(6, answer);
+  /// ```
+  pub fn add_one(x: i32) -> i32 {
+      x + 1
+  }
+  ````
+
+- You can use `cargo doc` to generate the docs as HTML, and can open it through `target/doc` directory or by running the command `cargo doc --open`.
+
+- Just like `Examples` as shown in the above code, you can use other sections too. Here are other [commonly used sections](https://doc.rust-lang.org/book/ch14-02-publishing-to-crates-io.html#commonly-used-sections).
+
+- Running `cargo test` will run the code examples in your documentation as tests! In case we change the function, the test will panic, and we'll require to update the docs to make it work.
+
+  ```zsh
+     Doc-tests my_crate
+
+  running 1 test
+  test src/lib.rs - add_one (line 5) ... ok
+
+  test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+  ```
+
+- To document a whole crate, `//!` is used in the crate root file (`src/lib.rs`). Using this `//!`, we’re documenting the item that contains this comment.
+
+  ```rust
+  //! # My Crate
+  //!
+  //! `my_crate` is a collection of utilities to make performing certain
+  //! calculations more convenient.
+  ```
 
 ### Cargo
 
@@ -5311,6 +5553,12 @@ For Windows:
   cargo build --release
   ```
 
+- To generate docs, you can access them through `target/doc`:
+
+  ```zsh
+  cargo doc
+  ```
+
 - To generate docs of all dependencies of your project and run them in browser:
 
   ```zsh
@@ -5329,8 +5577,27 @@ For Windows:
   cargo expand
   ```
 
+#### The `opt-level`
+
+- The `opt-level` setting controls the number of optimizations Rust will apply to your code, with a range of `0` to `3`.
+
+  ```toml
+  // Filename: Cargo.toml
+  [profile.dev]
+  opt-level = 0 // Less Optimization, less compiling time
+
+  [profile.release]
+  opt-level = 3 // More Optimizations, more compiling time
+  ```
+
+- You can override any default setting by adding a different value for it in `Cargo.toml`. To override, you can add these two lines below the above lines.
+
+  ```toml
+  // Filename: Cargo.toml
+  [profile.dev]
+  opt-level = 1
+  ```
+
+- To learn more about customizing profiles, you can read the docs [here](https://doc.rust-lang.org/cargo/reference/profiles.html).
+
 For more information about Cargo, check out [its documentation](https://doc.rust-lang.org/cargo/).
-
-```
-
-```
