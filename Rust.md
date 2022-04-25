@@ -5577,6 +5577,18 @@ For Windows:
   cargo expand
   ```
 
+- To install a package from crates.io into your system, you may use this command (only binary crates can be installed and ensure that `$HOME/.cargo/bin` is in your `$PATH`):
+
+  ```zsh
+  cargo install <package-name>
+  ```
+
+- To list out custom cargo commands:
+
+  ```zsh
+  cargo --list
+  ```
+
 #### The `opt-level`
 
 - The `opt-level` setting controls the number of optimizations Rust will apply to your code, with a range of `0` to `3`.
