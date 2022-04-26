@@ -4195,6 +4195,168 @@ Fun Fact: The implementations of closures and iterators are such that runtime pe
 
   - Iterators, although a high-level abstraction, get compiled down to roughly the same code as if you’d written the lower-level code yourself. Iterators are one of Rust’s `zero-cost abstractions`, which means that using the abstraction imposes no additional runtime overhead.
 
+### Smart Pointers
+
+- Differences between Pointer and Smart Pointer:
+
+| Pointer                                                                           | Smart Pointer                                                                                                                               |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| A pointer is a general concept for a variable that contains an address in memory. | Smart pointers, on the other hand, are data structures that not only act like a pointer but also have additional metadata and capabilities. |
+| References are pointers that only borrow data.                                    | Smart pointers _own_ the data they point to.                                                                                                |
+| The most common kind of pointer in Rust is a reference and is indicated by `&`.   | The commonly used smart pointers are `String` and `Vec<T>`.                                                                                 |
+
+- Smart pointers are usually implemented using `structs`.
+- The characteristic that distinguishes a smart pointer from an ordinary struct is that smart pointers implement the `Deref` and `Drop` traits.
+  - `Deref`: Allows an instance of the smart pointer struct to behave like a reference so you can write code that works with either references or smart pointers.
+  - `Drop`: Allows you to customize the code that is run when an instance of the smart pointer goes out of scope.
+
+#### `Box<T>`
+
+- For allocating values on Heap.
+- Box allows you to store _data on heap_ and the _pointer to the heap data on stack_.
+- You’ll use them most often in these situations:
+  - When you have a type whose size can’t be known at compile time and you want to use a value of that type in a context that requires an exact size
+  - When you have a large amount of data and you want to transfer ownership but ensure the data won’t be copied when you do so
+  - When you want to own a value and you care only that it’s a type that implements a particular trait rather than being of a specific type
+- Once Box goes out of scope, the deallocation happens for the box (stored on the stack) and the data it points to (stored on the heap).
+
+- Using `Box<T>` for the recursive call:
+  - Let's try to create an enum which will create it's variant recursively:
+
+    ```rust
+    // FAIL: While computing Size for Cons, Rust will detect an inifinite memory allocation
+    enum List {
+        Cons(i32, List),
+        Nil,
+    }
+
+    use crate::List::{Cons, Nil};
+
+    fn main() {
+        let list = Cons(1, Cons(2, Cons(3, Nil)));
+    }
+    ```
+
+  - When Rust will try to recognize the size, it'll recognize that it is an infinite loop:
+
+    <img src="https://doc.rust-lang.org/book/img/trpl15-01.svg" alt="Infinite List Containing Infinite Cons Value" width="400"/>
+
+  - Now, to make it easier for Rust to identify the size of enum at compile time, we can use `Box<T>` for the recursive call. Since `Box<T>` is a pointer, Rust will need not to find the size what's inside of it, instead just allocate the memory for it's pointer.
+
+    ```rust
+    enum List {
+        Cons(i32, Box<List>),
+        Nil,
+    }
+
+    use crate::List::{Cons, Nil};
+
+    fn main() {
+        let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+    }
+    ```
+
+  - Conceptually, we still have a list, created with lists “holding” other lists, but this implementation is now more like placing the items next to one another rather than inside one another.
+
+    <img src="https://doc.rust-lang.org/book/img/trpl15-02.svg" alt="List that is not infinitely sized" width="400"/>
+
+- Since `Box<T>` implements the `Deref` trait, so you can use the `*` operator to dereference it.
+
+#### `Deref` Trait
+
+- Note that the `*` operator is replaced with a call to the deref method and then a call to the `*` operator. It means that `*y`, translates into:
+
+  ```rust
+  *(y.deref())
+  ```
+
+- We're trying to re-create `Box<T>` and it's capabilities to dereference itself. One important thing to notice, here we're only mimicing the dereferencing because the data doesn't actually get stored on heap.
+
+  ```rust
+  use std::ops::Deref;
+
+  struct MyBox<T>(T);
+
+  impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T>  {
+        MyBox(x)
+    }
+  }
+
+  impl<T> Deref for MyBox<T> {
+      type Target = T;
+      
+      fn deref(&self) -> &Self::Target {
+          &self.0
+      }
+  }
+  ```
+
+#### Deref Coercion
+
+- Deref coercion can convert `&String` to `&str`. It's possible because `String` implements the `Deref` trait such that it returns `&str`.
+- They are meant for the arguments of functions and methods. The ease is that, you can pass `&String` into a function that accepts `&str`:
+
+  ```rust
+  fn hello(name: &str) {
+      println!("Hello, {}!", name);
+  }
+
+  fn main() {
+    let name = String::from("Bob");
+    hello(&name);
+  }
+  ```
+
+- Deref coercion was added to Rust so that programmers writing function and method calls don’t need to add as many explicit references and dereferences with `&` and `*`.
+
+- How does Rust automatically converts `&String` to `&str`?
+  - It happens because `Deref` trait is implemented.
+  - Rust simplifies all the deref implementations.
+
+- Here's an even complex example of deref coercion, using the `MyBox`, that we created earlier:
+  - Instead of calling this:
+
+    ```rust
+    fn main() {
+        let m = MyBox::new(String::from("Rust"));
+        hello(&(*m)[..]);
+    }
+    ```
+
+  - Here we are manually converting:
+
+    ```rust
+    (*m) => MyBox<String> -> String
+    [..] => String -> str
+    & => str -> &str
+    ```
+
+  - We can just call this:
+
+    ```rust
+    fn main() {
+        let m = MyBox::new(String::from("Rust"));
+        hello(&m);
+    }
+    ```
+
+  - Rust simplifies the deref implementations by calling the `deref()` again and again. First It'll call `deref()` for `MyBox` then for `String`.
+
+    ```rust
+    &MyBox<String> -> &String -> &str
+    ```
+
+Note: When the Deref trait is defined for the types involved, Rust will analyze the types and use `Deref::deref` as many times as necessary to get a reference to match the parameter’s type. The number of times that `Deref::deref` needs to be inserted is resolved at compile time, so there is no runtime penalty for taking advantage of deref coercion!
+
+- Rust does deref coercion when it finds types and trait implementations in three cases:
+
+  - From `&T` to `&U` when `T: Deref<Target=U>`
+  - From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
+  - From `&mut T` to `&U` when `T: Deref<Target=U>`
+
+Note: The first case states that if you have a `&T`, and `T` implements `Deref` to some type `U`, you can get a `&U` transparently. the second case is similar. The third case is a bit different as mutable reference changes into immutable reference, though vice versa is not true.
+
 ## OOPS
 
 ### Instance
