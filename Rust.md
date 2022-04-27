@@ -4221,6 +4221,7 @@ Fun Fact: The implementations of closures and iterators are such that runtime pe
 - Once Box goes out of scope, the deallocation happens for the box (stored on the stack) and the data it points to (stored on the heap).
 
 - Using `Box<T>` for the recursive call:
+
   - Let's try to create an enum which will create it's variant recursively:
 
     ```rust
@@ -4285,7 +4286,7 @@ Fun Fact: The implementations of closures and iterators are such that runtime pe
 
   impl<T> Deref for MyBox<T> {
       type Target = T;
-      
+
       fn deref(&self) -> &Self::Target {
           &self.0
       }
@@ -4311,10 +4312,12 @@ Fun Fact: The implementations of closures and iterators are such that runtime pe
 - Deref coercion was added to Rust so that programmers writing function and method calls don’t need to add as many explicit references and dereferences with `&` and `*`.
 
 - How does Rust automatically converts `&String` to `&str`?
+
   - It happens because `Deref` trait is implemented.
   - Rust simplifies all the deref implementations.
 
 - Here's an even complex example of deref coercion, using the `MyBox`, that we created earlier:
+
   - Instead of calling this:
 
     ```rust
@@ -4356,6 +4359,140 @@ Note: When the Deref trait is defined for the types involved, Rust will analyze 
   - From `&mut T` to `&U` when `T: Deref<Target=U>`
 
 Note: The first case states that if you have a `&T`, and `T` implements `Deref` to some type `U`, you can get a `&U` transparently. the second case is similar. The third case is a bit different as mutable reference changes into immutable reference, though vice versa is not true.
+
+#### `Drop` Trait
+
+- In Rust, you can specify that a particular bit of code be run whenever a value goes out of scope, and the compiler will insert this code automatically.
+- As a result, you don’t need to be careful about placing cleanup code everywhere in a program that an instance of a particular type is finished with—you still won’t leak resources!
+
+  ```rust
+  struct CustomSmartPointer {
+      data: String,
+  }
+
+  impl Drop for CustomSmartPointer {
+      fn drop(&mut self) {
+          println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+      }
+  }
+
+  fn main() {
+      let c = CustomSmartPointer {
+          data: String::from("my stuff"),
+      };
+      let d = CustomSmartPointer {
+          data: String::from("other stuff"),
+      };
+      println!("CustomSmartPointers created.");
+  }
+  // Output -
+  // CustomSmartPointers created.
+  // Dropping CustomSmartPointer with data `other stuff`!
+  // Dropping CustomSmartPointer with data `my stuff`!
+  ```
+
+- Notice that, variables are dropped in the reverse order, `d` was dropped before `c`.
+- There might be some cases when you want to manually drop the Smart Pointer, instead of waiting for the scope to end. For example, you want to release the lock so that other code in the same scope can acquire the lock.
+
+  - First thing is that, you can't call the `drop()` from the `Drop` trait.
+
+    ```rust
+    // FAIL: This is not allowed in Rust, compiler will throw "explicit destructor calls not allowed"
+    fn main() {
+        let c = CustomSmartPointer {
+            data: String::from("some data"),
+        };
+        println!("CustomSmartPointer created.");
+        c.drop();
+        println!("CustomSmartPointer dropped before the end of main.");
+    }
+    ```
+
+    ```zsh
+      --> src/main.rs:16:7
+       |
+    16 |     c.drop();
+       |     --^^^^--
+       |     | |
+       |     | explicit destructor calls not allowed
+       |     help: consider using `drop` function: `drop(c)`
+    ```
+
+  - Compiler uses term `destructor`, which is the general programming term for a function that cleans up an instance. It is analogous to the word `constructor`.
+  - The reason that compiler doesn't allows us to do that, is to prevent the _double free error_.
+  - The alternative is to use `drop()` from `std::mem::drop`, good thing is it's already in the `prelude`, so you don't need to import it.
+
+    ```rust
+    fn main() {
+        let c = CustomSmartPointer {
+            data: String::from("some data"),
+        };
+        println!("CustomSmartPointer created.");
+        drop(c); // Notice, we're passing it as an argument
+        println!("CustomSmartPointer dropped before the end of main.");
+    }
+
+    // Ouput -
+    // CustomSmartPointer created.
+    // Dropping CustomSmartPointer with data `some data`!
+    // CustomSmartPointer dropped before the end of main.
+    ```
+
+  - It solves the _double free error_ through the ownership rules, as we pass it as an argument.
+
+#### `Rc<T>`
+
+- Also known as _Reference Counted Smart Pointer_, it allows multiple ownership.
+- It does that by keeping the count of references. When the count becomes 0, it means that there are no references linked to data, so it's safe to clean.
+- Imagine `Rc<T>` as a TV in a family room. When one person enters to watch TV, they turn it on. Others can come into the room and watch the TV. When the last person leaves the room, they turn off the TV because it’s no longer being used. If someone turns off the TV while others are still watching it, there would be uproar from the remaining TV watchers!
+- Use case:
+  - We want to allocate data on heap and we want multiple parts of our code to read it.
+  - The problem is that we don't know which part will stop reading it last, that's why we can't make someone as an owner.
+  - For those cases, `Rc<T>` will help us, it'll save us from deciding someone as owner and will allow multiple parts to read it at the same time.
+
+- With `Rc<T>` it is possible to create two lists that both share ownership of a third list.
+
+  <img src="https://doc.rust-lang.org/book/img/trpl15-03.svg" alt="List that is not infinitely sized" width="400"/>
+  
+  - Trying to do this with `Box<T>` fails:
+
+    ```rust
+    enum List {
+        Cons(i32, Box<List>),
+        Nil,
+    }
+
+    use crate::List::{Cons, Nil};
+
+    fn main() {
+        let a = Cons(5, Box::new(Cons(10, Box::new(Nil))));
+        let b = Cons(3, Box::new(a));
+        let c = Cons(4, Box::new(a));
+    }
+    ```
+
+  - We can also use references with lifetimes to solve this problem, but `Rc<T>` is better here.
+  
+    ```rust
+    enum List {
+        Cons(i32, Rc<List>),
+        Nil,
+    }
+
+    use crate::List::{Cons, Nil};
+    use std::rc::Rc;
+
+    fn main() {
+        let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+        let b = Cons(3, Rc::clone(&a)); // Notice that we don't need to use Rc<T> here, since no one will be owning b and c
+        let c = Cons(4, Rc::clone(&a)); // Also notice that we're using Rc::clone() and passing reference to create owners
+    }
+    ```
+
+  - `Rc::clone()` never makes deep copy, unlike `clone()`. `Rc::clone()` only increments the reference count, which doesn’t take much time.
+  - To Increase Count: `Rc::clone()`, To Decrease Count: `Drop` does when the variable goes out of scope.
+
+Note: `Rc<T>` can only allow multiple owners to read data and not to mutate it. For interior mutability there is another Smart Pointer named `RefCell<T>`.
 
 ## OOPS
 
