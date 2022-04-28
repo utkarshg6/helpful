@@ -4446,6 +4446,7 @@ Note: The first case states that if you have a `&T`, and `T` implements `Deref` 
 - It does that by keeping the count of references. When the count becomes 0, it means that there are no references linked to data, so it's safe to clean.
 - Imagine `Rc<T>` as a TV in a family room. When one person enters to watch TV, they turn it on. Others can come into the room and watch the TV. When the last person leaves the room, they turn off the TV because it’s no longer being used. If someone turns off the TV while others are still watching it, there would be uproar from the remaining TV watchers!
 - Use case:
+
   - We want to allocate data on heap and we want multiple parts of our code to read it.
   - The problem is that we don't know which part will stop reading it last, that's why we can't make someone as an owner.
   - For those cases, `Rc<T>` will help us, it'll save us from deciding someone as owner and will allow multiple parts to read it at the same time.
@@ -4453,7 +4454,7 @@ Note: The first case states that if you have a `&T`, and `T` implements `Deref` 
 - With `Rc<T>` it is possible to create two lists that both share ownership of a third list.
 
   <img src="https://doc.rust-lang.org/book/img/trpl15-03.svg" alt="List that is not infinitely sized" width="400"/>
-  
+
   - Trying to do this with `Box<T>` fails:
 
     ```rust
@@ -4472,7 +4473,7 @@ Note: The first case states that if you have a `&T`, and `T` implements `Deref` 
     ```
 
   - We can also use references with lifetimes to solve this problem, but `Rc<T>` is better here.
-  
+
     ```rust
     enum List {
         Cons(i32, Rc<List>),
@@ -4493,6 +4494,186 @@ Note: The first case states that if you have a `&T`, and `T` implements `Deref` 
   - To Increase Count: `Rc::clone()`, To Decrease Count: `Drop` does when the variable goes out of scope.
 
 Note: `Rc<T>` can only allow multiple owners to read data and not to mutate it. For interior mutability there is another Smart Pointer named `RefCell<T>`.
+
+#### `RefCell<T>`
+
+- Allows interior mutability to the immutable data.
+- Interior mutability is a design pattern in Rust that allows you to mutate data even when there are immutable references to that data; normally, this action is disallowed by the borrowing rules.
+- It uses `unsafe` rust code to function.
+
+- An example:
+
+- Consider one `trait` named `Messanger` and another `struct` named `LimitTracker`.
+
+```rust
+pub trait Messenger {
+    fn send(&self, msg: &str);
+}
+
+pub struct LimitTracker<'a, T: Messenger> {
+  messenger: &'a T,
+  value: usize;
+}
+
+impl<'a, T> LimitTracker<'a, T>
+where
+    T: Messenger,
+{
+    pub fn new(messenger: &T, max: usize) -> LimitTracker<T> {
+      ...
+    }
+
+    pub fn set_value(&mut self, value: usize) { // Problem 1: We want mutable reference of self, but it includes immutable reference to messenger
+      self.value = value;
+
+      if (value > 100) {
+        self.messenger.send("Error: You are over your quota!"); // Problem 2: send() is an immutable function in trait, but self should be mutable.
+      }
+    }
+}
+```
+
+- `LimitTracker` takes in a reference of `struct` that implements `Messenger`, so that it can store it as one of it's field.
+- Inside `LimitTracker`, the problem is that `set_value()` takes **mutable reference** of `self`, but the `messenger` is an immutable reference and it's function send is also `immutable`. So, how can we test this `set_value()`?
+
+- This will fail to compile:
+
+  ```rust
+  // FAIL: send() is required to be mutable by LimitTracker but immutable due to trait Messenger
+  #[cfg(test)]
+  mod tests {
+      use super::*;
+
+      struct MockMessenger {
+          sent_messages: Vec<String>,
+      }
+
+      impl MockMessenger {
+          fn new() -> MockMessenger {
+              MockMessenger {
+                  sent_messages: vec![], // This is immutable
+              }
+          }
+      }
+
+      impl Messenger for MockMessenger {
+          fn send(&self, message: &str) {
+               // We're trying to push on immutbale field, we also can't make send() mutable
+              self.sent_messages.push(String::from(message));
+          }
+      }
+
+      #[test]
+      fn it_sends_an_over_75_percent_warning_message() {
+          let mock_messenger = MockMessenger::new();
+          let mut limit_tracker = LimitTracker::new(&mock_messenger, 100);
+
+          limit_tracker.set_value(80);
+
+          assert_eq!(mock_messenger.sent_messages.len(), 1);
+      }
+  }
+  ```
+
+- Here's the solution using `RefCell<T>`:
+
+  ```rust
+  #[cfg(test)]
+  mod tests {
+      use super::*;
+      use std::cell::RefCell;
+
+      struct MockMessenger {
+          // RefCell will make sent_messages mutable even though
+          // it's parent MockMessenger can seem immutable to others
+          sent_messages: RefCell<Vec<String>>,
+      }
+
+      impl MockMessenger {
+          fn new() -> MockMessenger {
+              MockMessenger {
+                  // Now, RefCell will wrap the vector and will allow it to be mutable
+                  // at places where it's parent is asked to be immutable
+                  sent_messages: RefCell::new(vec![]),
+              }
+          }
+      }
+
+      impl Messenger for MockMessenger {
+          fn send(&self, message: &str) {
+              // MockMessenger will seem immutable to send() but
+              // sent_messages is mutable, and items can be pushed into it
+              self.sent_messages.borrow_mut().push(String::from(message)); // borrow_mut() will generate mutable reference for push()
+          }
+      }
+
+      #[test]
+      fn it_sends_an_over_75_percent_warning_message() {
+          // --snip--
+
+          assert_eq!(mock_messenger.sent_messages.borrow().len(), 1); // borrow() will generate the immutable reference, since we're only reading
+      }
+  }
+  ```
+
+- We use the `&` and `&mut` syntax with references. With `RefCell<T>`, we use the `borrow()` and `borrow_mut()` methods and they return `Ref<T>` and `RefMut<T>` respectively. They both implement `Deref` trait.
+
+- `RefCell<T>` lets us have many immutable borrows or one mutable borrow at any point in time. It keeps a count of whenever we call the `borrow()`.
+- In case of an error, it won't be just a compile error, but will appear on Runtime, and will cause a panic.
+
+#### Differences between `Box<T>`, `Rc<T>` and `RefCell<T>`
+
+  | Property                 | `Box<T>`                        | `Rc<T>`                            | `RefCell<T>`                       |
+  | ------------------------ | ------------------------------- | ---------------------------------- | ---------------------------------- |
+  | Ownership                | Single Ownership                | Multiple Ownership                 | Single Ownership                   |
+  | Mutability of Inner Data | Immutable or Mutable            | Only Immutable                     | Immutable or Mutable               |
+  | Borrowing Rules Check    | Compiled Time (compiler errors) | Compiled Time (compiler errors)    | Runtime (panics at runtime)        |
+  | Multithreading           |                                 | Only for Single Threaded Scenarios | Only for Single Threaded Scenarios |
+
+#### Using `RefCell<T>` with `Rc<T>`
+
+- It'll give you superpowers.
+- Now you can have a value that has multiple owners and can also mutate.
+- To use it, you'll have to wrap it like this, `Rc<RefCell<T>>`.
+- Here's our modified `Cons` list:
+
+  ```rust
+  enum List {
+      Cons(Rc<RefCell<i32>>, Rc<List>),
+      Nil,
+  }
+  ```
+
+- Now, we can have a list like this:
+
+  ```zsh
+  b --|
+      a---Nil
+  c --|
+  ```
+
+- Here, `a` can have multiple owners `b` and `c`, and it's value can also mutate.
+
+  ```rust
+  fn main() {
+      let value = Rc::new(RefCell::new(5)); // Created a value that can have multiple owners and can also mutate
+
+      let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil))); // Make a such that it can be owned by multiple people
+
+      let b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&a)); // Make b the owner of a
+      let c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&a)); // Made c the owner of a
+
+      *value.borrow_mut() += 10;
+
+      println!("a after = {:?}", a); // Value of a: Cons(RefCell { value: 15 }, Nil)
+      println!("b after = {:?}", b); // Value of b: Cons(RefCell { value: 3 }, Cons(RefCell { value: 15 }, Nil))
+      println!("c after = {:?}", c); // Value of c: Cons(RefCell { value: 4 }, Cons(RefCell { value: 15 }, Nil))
+  }
+  ```
+
+- Other Types to provide interior mutability:
+  - `Cell<T>`: It copies the data instead of giving references.
+  - `Mutex<T>`: It provides interior mutability that's safe to use in multiple threads. 
 
 ## OOPS
 
