@@ -4623,12 +4623,12 @@ where
 
 #### Differences between `Box<T>`, `Rc<T>` and `RefCell<T>`
 
-  | Property                 | `Box<T>`                        | `Rc<T>`                            | `RefCell<T>`                       |
-  | ------------------------ | ------------------------------- | ---------------------------------- | ---------------------------------- |
-  | Ownership                | Single Ownership                | Multiple Ownership                 | Single Ownership                   |
-  | Mutability of Inner Data | Immutable or Mutable            | Only Immutable                     | Immutable or Mutable               |
-  | Borrowing Rules Check    | Compiled Time (compiler errors) | Compiled Time (compiler errors)    | Runtime (panics at runtime)        |
-  | Multithreading           |                                 | Only for Single Threaded Scenarios | Only for Single Threaded Scenarios |
+| Property                 | `Box<T>`                        | `Rc<T>`                            | `RefCell<T>`                       |
+| ------------------------ | ------------------------------- | ---------------------------------- | ---------------------------------- |
+| Ownership                | Single Ownership                | Multiple Ownership                 | Single Ownership                   |
+| Mutability of Inner Data | Immutable or Mutable            | Only Immutable                     | Immutable or Mutable               |
+| Borrowing Rules Check    | Compiled Time (compiler errors) | Compiled Time (compiler errors)    | Runtime (panics at runtime)        |
+| Multithreading           |                                 | Only for Single Threaded Scenarios | Only for Single Threaded Scenarios |
 
 #### Using `RefCell<T>` with `Rc<T>`
 
@@ -4663,7 +4663,7 @@ where
       let b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&a)); // Make b the owner of a
       let c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&a)); // Made c the owner of a
 
-      *value.borrow_mut() += 10;
+      *value.borrow_mut() += 10; // Rc -> RefCell -> &mut -> inner_element, then 10 is added to the inner_element in place
 
       println!("a after = {:?}", a); // Value of a: Cons(RefCell { value: 15 }, Nil)
       println!("b after = {:?}", b); // Value of b: Cons(RefCell { value: 3 }, Cons(RefCell { value: 15 }, Nil))
@@ -4673,7 +4673,159 @@ where
 
 - Other Types to provide interior mutability:
   - `Cell<T>`: It copies the data instead of giving references.
-  - `Mutex<T>`: It provides interior mutability that's safe to use in multiple threads. 
+  - `Mutex<T>`: It provides interior mutability that's safe to use in multiple threads.
+
+#### Memory Leak
+
+- When we accidentally create memory that is never cleaned up is called _Memory Leak_.
+- Rust’s memory safety guarantees make it difficult, but not impossible.
+- Rust allows memory leaks by using `Rc<T>` and `RefCell<T>`.
+- By using both of them together, it's possible to create a _reference cycle_.
+- A _reference cycle_ happens when reference of `a` is owned by `b` and reference of `b` is owned by `a`.
+- First of all, this will cause an infinite loop of references.
+- Also, it'll be impossible for Rust to `Drop` the values of `a` and `b`, as their reference count will never be zero.
+- This is one of Rust's limitations, and is referred to the _problem of Memory Leak_.
+
+- Reference Cycle in Action:
+
+  ```rust
+  use crate::List::{Cons, Nil};
+  use std::cell::RefCell;
+  use std::rc::Rc;
+
+  #[derive(Debug)]
+  enum List {
+      Cons(i32, RefCell<Rc<List>>), // We can replace the list in place now
+      Nil
+  }
+
+  impl List {
+      fn tail(&self) -> Option<&RefCell<Rc<List>>> {
+          match self {
+              Cons(_, item) => Some(item),
+              Nil => None,
+          }
+      }
+  }
+
+  fn main() {
+      let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil)))); // a = (5, Nil)
+
+
+      let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&a)))); // b = (10, a)
+
+      if let Some(link) = a.tail() {
+          *link.borrow_mut() = b; // a = (5, b)
+      }
+
+      // At this point, Rc Count of a: 2, b: 2
+
+      // This will try to print the lists infinitely
+      // and then will crash with the stack overflow error
+      println!("a next item = {:?}", a.tail());
+  }
+
+  // In case, we comment out the println!()
+  // At the end of scope, Rust will try to decrease the count of references
+  // Rc Count of b will decrease to 1
+  // Rc Count of a will decrease to 1
+  // Neither a nor b will be dropped as their count is not 0 and
+  // will still stay on the heap, causing Memory Leak
+  ```
+
+- You may take help of this diagram to understand better:
+
+  <img src="https://doc.rust-lang.org/book/img/trpl15-04.svg" alt="List that is not infinitely sized" width="400"/>
+
+Important Lesson:
+You can't rely on Rust's memory safety while using `RefCell<T>` and `Rc<T>` together, or another combination with interior mutability, as it may cause the problem of _Memory Leak_.
+
+Solutions to prevent Reference Cycles:
+
+- Use Automated tests, Code reviews, and other Software development practices to minimize.
+- Reorganize data structure so that some references express ownership and some references don't.
+
+| Strong Count                                               | Weak Count                                                                             |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Rust will only drop an element if this count becomes zero. | Rust will drop an element in case it gets out of scope, even if the count is not zero. |
+| `Rc<T>` uses strong count.                                 | `Weak<T>` uses weak count.                                                             |
+| It's hard to prevent reference cycle.                      | It's easier to prevent reference cycle.                                                |
+
+- Preventing Reference Cycle using `Weak<T>`:
+
+  ```rust
+  use std::cell::RefCell;
+  use std::rc::{Rc, Weak};
+
+  #[derive(Debug)]
+  struct Node {
+      value: i32,
+      parent: RefCell<Weak<Node>>, // Child won't own it's parent
+      children: RefCell<Vec<Rc<Node>>>,
+  }
+
+  fn main() {
+      let leaf = Rc::new(Node {
+          value: 3,
+          parent: RefCell::new(Weak::new()),
+          children: RefCell::new(vec![])
+      });
+
+      let branch = Rc::new(Node {
+          value: 5,
+          parent: RefCell::new(Weak::new()),
+          children: RefCell::new(vec![Rc::clone(&leaf)])
+      });
+
+      // The downgrade() changes Rc -> Weak
+      *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+      // The upgrade() returns Some() or None, representing the value
+      println!("Leaf parent: {:?}", leaf.parent.borrow().upgrade());
+  }
+  ```
+
+- The output will look like this:
+
+  ```zsh
+  leaf parent = Some(Node { value: 5, parent: RefCell { value: (Weak) },
+  children: RefCell { value: [Node { value: 3, parent: RefCell { value: (Weak) },
+  children: RefCell { value: [] } }] } })
+  ```
+
+- Notice, at some places only `Weak` is there, and the whole element is not printed. This is Rust's way of preventing infinite output.
+- This lack of inifinite output, indicates that reference cycle is prevented.
+
+- Here's another example, using the same struct to show how strong count and weak count will change:
+
+  ```rust
+  fn main() {
+      let leaf = Rc::new(Node {
+          value: 3,
+          parent: RefCell::new(Weak::new()),
+          children: RefCell::new(vec![]),
+      });
+
+      // leaf strong = 1, weak = 0
+
+      {
+          let branch = Rc::new(Node {
+              value: 5,
+              parent: RefCell::new(Weak::new()),
+              children: RefCell::new(vec![Rc::clone(&leaf)]),
+          });
+
+          // Since Rc is downgrading branch, branch's weak count will increase by 1
+          *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+          // branch strong = 1, weak = 1
+
+          // leaf strong = 2, weak = 0
+      }
+
+      // leaf strong = 1, weak = 0
+  }
+  ```
 
 ## OOPS
 
