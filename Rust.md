@@ -4827,6 +4827,173 @@ Solutions to prevent Reference Cycles:
   }
   ```
 
+### Concurrency
+
+- Difference between Concurrency and Parallel programming:
+
+| Concurrent Programming                                  | Parallel Programming                                       |
+| ------------------------------------------------------- | ---------------------------------------------------------- |
+| Where different parts of program execute independently. | Where different parts of program execute at the same time. |
+
+#### Using Threads
+
+- OS manages multiple processes at once.
+- An executed program's code is run in a process.
+- You can write programs such that there are indpendent pieces of code that run simultaneously.
+- The features that run these parts simultaneously are called _threads_.
+- Threads can run simultaneously, there’s no inherent guarantee about the order in which parts of your code on different threads will run. This causes the following problems:
+  - **Race conditions**: Where threads are accessing data or resources in an inconsistent order.
+  - **Deadlocks**: Where two threads are waiting for each other to finish using a resource the other thread has, preventing both threads from continuing.
+  - **Bugs**: Hard to reproduce bugs, and only happens in certain situations.
+- Many operating systems provide an API for creating new threads. This model where a language calls the operating system APIs to create threads is sometimes called **_1:1_**, meaning _1 OS Thread / 1 Language Thread_. The rust standard library provides the implementation for only _1:1_.
+
+- Creating a new thread with `spawn`:
+
+  ```rust
+  use std::thread;
+  use std::time::Duration;
+
+  fn main() {
+    thread::spawn(|| {
+      for i in 1..10 {
+        println!("hi number {} from the spawned thread", i);
+        thread::sleep(Duration::from_millis(1));
+      }
+    });
+
+    for i in 1..5 {
+      println!("hi number {} from the main thread", i);
+      thread::sleep(Duration::from_millis(1));
+    }
+  }
+  ```
+
+- The output will be:
+
+  ```zsh
+  hi number 1 from the main thread
+  hi number 1 from the spawned thread
+  hi number 2 from the main thread
+  hi number 2 from the spawned thread
+  hi number 3 from the main thread
+  hi number 3 from the spawned thread
+  hi number 4 from the main thread
+  hi number 4 from the spawned thread
+  hi number 5 from the spawned thread
+  ```
+
+- The spawned thread will automatically die as the main thread ends.
+- That's why spawned thread ran 5 times, 4 times same as main thread and the 5th time, which is exectued to break the condition for the main thread's for loop condition.
+- Which thread will execute first is not guaranteed, you may notice in our case, the main thread runs first, even though according to the code, the spawned thread should have ran first.
+- In fact, there is not even a guarantee that this spwaned thread will even run at all.
+- We can make sure that the spawned thread will definitely run and will execute completely, by using the `join()`
+
+  ```rust
+  use std::thread;
+  use std::time::Duration;
+
+  fn main() {
+      // Let's store the thread in a variable
+      let handle = thread::spawn(|| {
+          for i in 1..10 {
+              println!("hi number {} from the spawned thread!", i);
+              thread::sleep(Duration::from_millis(1));
+          }
+      });
+
+      for i in 1..5 {
+          println!("hi number {} from the main thread!", i);
+          thread::sleep(Duration::from_millis(1));
+      }
+
+      // This will make sure that the spawned thread
+      // finishes before the main thread ends
+      handle.join().unwrap();
+  }
+  ```
+
+- The two threads will now continue alternating, but the main thread  will wait because of the call to `handle.join()` and will not end until the spawned thread is finished.
+- It is very important, where you call the `handle.join()`, as it may create an unexpected behaviour:
+
+  ```rust
+  use std::thread;
+  use std::time::Duration;
+
+  fn main() {
+      let handle = thread::spawn(|| {
+          for i in 1..10 {
+              println!("hi number {} from the spawned thread!", i);
+              thread::sleep(Duration::from_millis(1));
+          }
+      });
+
+      handle.join().unwrap();
+
+      for i in 1..5 {
+          println!("hi number {} from the main thread!", i);
+          thread::sleep(Duration::from_millis(1));
+      }
+  }
+  ```
+
+- This will give us this output:
+
+  ```zsh
+  hi number 1 from the spawned thread!
+  hi number 2 from the spawned thread!
+  hi number 3 from the spawned thread!
+  hi number 4 from the spawned thread!
+  hi number 5 from the spawned thread!
+  hi number 6 from the spawned thread!
+  hi number 7 from the spawned thread!
+  hi number 8 from the spawned thread!
+  hi number 9 from the spawned thread!
+  hi number 1 from the main thread!
+  hi number 2 from the main thread!
+  hi number 3 from the main thread!
+  hi number 4 from the main thread!
+  ```
+
+- So, make sure that you're calling the `handle.join()` to prevent undesired behaviour.
+
+- When we use closure, Rust will infer that we want to only borrow the variable.
+
+  ```rust
+  use std::thread;
+
+  fn main() {
+      let v = vec![1, 2, 3];
+
+      // Notice, here v is only borrowed here,
+      // it's possible that the closure may outlive
+      // and v may die early, so Rust will throw us
+      // error, and will ask us to use move 
+      let handle = thread::spawn(|| {
+          println!("Here's a vector: {:?}", v);
+      });
+
+      handle.join().unwrap();
+  }
+  ```
+
+- So, we need to expicitly add the `move` keyword, to tell Rust to transfer ownership of `v` to the closure.
+
+  ```rust
+  use std::thread;
+
+  fn main() {
+      let v = vec![1, 2, 3];
+
+      let handle = thread::spawn(move || {
+          println!("Here's a vector: {:?}", v);
+      });
+
+      // Now, we cannot use v over here, inside the main thread for any reason
+
+      handle.join().unwrap();
+  }
+  ```
+
 ## OOPS
 
 ### Instance
