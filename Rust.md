@@ -5118,7 +5118,7 @@ _“Do not communicate by sharing memory; instead, share memory by communicating
     - The threads use `move`, which moves the ownership of variable to the thread.
     - Rust won't allow us to move the ownership of lock counter in multiple threads.
   - Why can't we use `Rc<T>`, to provide multiple ownership to individual threads?
-    - `Rc<T>` is not safe to share across threads.
+    - `Rc<T>` is not safe to share across threads. It is possible if we use `Rc<T>` in multiple threads, then both threads might update the reference count at same time.
     - It doesn’t use any concurrency primitives to make sure that changes to the count can’t be interrupted by another thread.
     - That could lead to Wrong Counts and Memory Leak.
   - What do we need then?
@@ -5156,6 +5156,21 @@ _“Do not communicate by sharing memory; instead, share memory by communicating
 
 - The combination of `Arc<Mutex<T>>`, is analogous to `Rc<RefCell<T>>`.
 - Keep in mind using `Mutex<T>` is risky, as logical errors may lead to _deadlocks_.
+
+#### `Send` and `Sync` trait
+
+- These two traits are part of the language itself, unlike otheer features of concurrency as they were part of the standard library.
+- They are called `std::marker` traits.
+- `Send` vs `Sync`
+
+  | `Send`                                                               | `Sync`                                                                                   |
+  | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+  | It is safe to transfer ownership of a type between threads.          | It is safe to use that type's reference betweeen threads.                                |
+  | Any type `T` that implements `Sync`                                  | Type `T` is `Sync`, if it's reference (`&T`) is `Send` or if type `T` implements `Sync`. |
+  | Except `Rc<T>`, almost all types are `Send`. (use `Arc<T>` instead). | Primitive Types, `Mutex<T>` are `Sync` but `Rc<T>`, `RefCell<T>` are not.                |
+
+- We don't need to implement `Send` and `Sync` for the types that are made up of those types that implements these traits.
+- In case you need to implement thes traits for a particular type than it means you'll need to write some `unsafe` rust code. You can learn the Dark Arts of Unsafe Code from this book [“The Rustonomicon”](https://doc.rust-lang.org/nomicon/index.html).
 
 ## OOPS
 
