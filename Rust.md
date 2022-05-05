@@ -5172,6 +5172,74 @@ _“Do not communicate by sharing memory; instead, share memory by communicating
 - We don't need to implement `Send` and `Sync` for the types that are made up of those types that implements these traits.
 - In case you need to implement thes traits for a particular type than it means you'll need to write some `unsafe` rust code. You can learn the Dark Arts of Unsafe Code from this book [“The Rustonomicon”](https://doc.rust-lang.org/nomicon/index.html).
 
+#### OOP (Object Oriented Programming)
+
+- Characterstics of OOP:
+  - _Objects contain data and behaviour_:
+    - Programs should make up of objects.
+    - An object packages both data and it's methods.
+    - Rust offers `struct`, `enum` and `impl` blocks to provide this characterstic.
+  - _Encapsulation_:
+    - When the implementation details are hidden from the code that is using the object.
+    - The only way to use an object is through it's public API.
+    - This enables the programmer to change and refactor an object’s internals without needing to change the code that uses the object.
+    - Rust encapsulates everything by default and offers `pub` keyword to make things public.
+  - _Inheritance_:
+    - When an object can inherit from another object’s definition, so that it can use it's parent object's data and behavior without defining them again.
+    - Rust doesn't offers inheritance between `struct`, but has `trait` where you can use default methods that is both reusable and can be overridden.
+    - The reasons to use inheritance are: _code reusability_ and _polymorphism_.
+    - Polymorphism means that you don't need to explicitly define the type in code, but can be detected during runtime. It is useful when two types share same characterstics.
+    - Rust offers polymorphism in a more general manner. It offers `generics` to generalize the accepted types and `trait bounds`, to constraint the allowed types.
+
+Note: People think "polymorphism is synonymous with inheritance". But it is a more general concept which means that a certain code can be referred to multiple types. It is used when two types share some common characterstics. In inheritance, those types are only subclasses.
+
+- Problems with Inheritance:
+
+  - It adds the risk of sharing more code than necessary.
+  - Subclasses are forced to share all the characterstics of the parents, even though sometimes it's not necessary or even undesired.
+  - Sometimes calling the functions on the subclass doen't makes sense and even cause errors.
+  - Due to this, some programming languages will only allow a subclass to inherit from one class, further restricting the flexibility of a program’s design.
+
+- Rust is different, it takes a completely different approach by using trait objects instead of inheritance.
+
+##### Defining a common behaviour using trait
+
+- A `trait` object points to both:
+
+  - An instance of a type implementing our specified trait
+  - A table used to look up trait methods on that type at runtime.
+
+| Property           | `struct` or `enum`          | `trait`                                      | Objects in other languages                 |
+| ------------------ | --------------------------- | -------------------------------------------- | ------------------------------------------ |
+| Stores Data        | Yes                         | No                                           | Yes                                        |
+| Stores Behaviour   | No                          | Yes                                          | Yes                                        |
+| Data and behaviour | Seperated by `impl` blocks. | Combined                                     | Combined                                   |
+| Uses               | Store same items together   | Store common behaviour and allow abstraction | Store same items and their common behavior |
+
+- An example:
+  - _Problem:_  Let's say initially we have components such as `Button` and `Image` that may use a common functionality _to draw_ on the screen. It's possible that someday programmers want to introduce one more component named `SelectBox`. So, what we'll end up with are different types of structures that wants to use a common functionality.
+  - _Solution:_ We can invent a common function named `draw()`, which will have different implementations for different types of components.
+  - _How to build:_ We'll initialise a `trait` that can be shared among various components and a `struct` that can hold these compoenents.
+
+  - The `trait` will look like this:
+  
+    ```rust
+    // A common functionality shared between multiple components
+    pub trait Draw {
+        fn draw(&self);
+    }
+    ```
+
+  - We can build a `struct` that holds the components that implements the `Draw`:
+
+    ```rust
+    pub struct Screen {
+        // Box will allow to store the components on heap
+        // dyn keyword will add the ability to detect a type that implements Draw on runtime
+        pub components: Vec<Box<dyn Draw>>,
+    }
+    ```
+
 ## OOPS
 
 ### Instance
