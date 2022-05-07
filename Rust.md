@@ -5217,12 +5217,13 @@ Note: People think "polymorphism is synonymous with inheritance". But it is a mo
 | Uses               | Store same items together   | Store common behaviour and allow abstraction | Store same items and their common behavior |
 
 - An example:
-  - _Problem:_  Let's say initially we have components such as `Button` and `Image` that may use a common functionality _to draw_ on the screen. It's possible that someday programmers want to introduce one more component named `SelectBox`. So, what we'll end up with are different types of structures that wants to use a common functionality.
+
+  - _Problem:_ Let's say initially we have components such as `Button` and `Image` that may use a common functionality _to draw_ on the screen. It's possible that someday programmers want to introduce one more component named `SelectBox`. So, what we'll end up with are different types of structures that wants to use a common functionality.
   - _Solution:_ We can invent a common function named `draw()`, which will have different implementations for different types of components.
   - _How to build:_ We'll initialise a `trait` that can be shared among various components and a `struct` that can hold these compoenents.
 
   - The `trait` will look like this:
-  
+
     ```rust
     // A common functionality shared between multiple components
     pub trait Draw {
@@ -5238,7 +5239,94 @@ Note: People think "polymorphism is synonymous with inheritance". But it is a mo
         // dyn keyword will add the ability to detect a type that implements Draw on runtime
         pub components: Vec<Box<dyn Draw>>,
     }
+
+    impl Screen {
+        pub fn run(&self) {
+            for component in self.components.iter() {
+                component.draw();
+            }
+        }
+    }
     ```
+
+  - The difference with the alternative implementation using trait bounds in `struct` is that it restricts us to a `Screen` instance that has a list of components all of type `Button` or all of type `TextField`. At compile time, the definitions will be monomorphized.
+
+    ```rust
+    pub struct Screen<T: Draw> {
+        pub components: Vec<T>,
+    }
+
+    impl<T> Screen<T>
+    where
+        T: Draw,
+    {
+        pub fn run(&self) {
+            for component in self.components.iter() {
+                component.draw();
+            }
+        }
+    }
+    ```
+
+  - Programmers can now create new components like this:
+
+    ```rust
+    use gui::Draw;
+
+    pub struct Button {
+        // Some fields
+    }
+
+    impl Draw for Button {
+        fn draw(&self) {
+            // code to actually draw something
+        }
+    }
+    ```
+
+  - Users of this library can now use it like this:
+
+    ```rust
+    use gui::{Button, Screen};
+
+    fn main() {
+        let screen = Screen {
+            components: vec![
+                Box::new(SelectBox {
+                    width: 75,
+                    height: 10,
+                    options: vec![
+                        String::from("Yes"),
+                        String::from("Maybe"),
+                        String::from("No"),
+                    ],
+                }),
+                Box::new(Button {
+                    width: 50,
+                    height: 10,
+                    label: String::from("OK"),
+                }),
+            ],
+        };
+
+        screen.run();
+    }
+    ```
+
+  - This concept is similar to the concept like _duck typing_: if it walks like a duck and quacks like a duck, then it must be a duck!
+
+  - Use Cases:
+    - Generics with trait bounds: If you’ll only ever have homogeneous collections. For Example, all elements of vector will be of type `Button`.
+    - `Box<dyn T>`: You can use heterogeneous collections. For Example, elements can be a mix of `Button`, `TextField` etc.
+
+- Static Dispatch vs Dynamic Dispatch:
+
+| Static Dispatch                                                | Dynamic Dispatch                                                               |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Concrete types are decided at compile time.                    | The compiler emits code that at runtime will figure out which method to call.  |
+| Compiler writes some new code for various concrete types.      | At runtime, it is decided whether a selected type can follow the requirements. |
+| When we use trait bounds on generics, static dispatch happens. | When we want to perform dynamic dispatch, we can use the `dyn` keyword.        |
+| No runtime cost is added.                                      | Some runtime cost is added.                                                    |
 
 ## OOPS
 
