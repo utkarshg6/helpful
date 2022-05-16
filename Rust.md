@@ -5172,7 +5172,7 @@ _“Do not communicate by sharing memory; instead, share memory by communicating
 - We don't need to implement `Send` and `Sync` for the types that are made up of those types that implements these traits.
 - In case you need to implement thes traits for a particular type than it means you'll need to write some `unsafe` rust code. You can learn the Dark Arts of Unsafe Code from this book [“The Rustonomicon”](https://doc.rust-lang.org/nomicon/index.html).
 
-#### OOP (Object Oriented Programming)
+### OOP (Object Oriented Programming)
 
 - Characterstics of OOP:
   - _Objects contain data and behaviour_:
@@ -5202,7 +5202,7 @@ Note: People think "polymorphism is synonymous with inheritance". But it is a mo
 
 - Rust is different, it takes a completely different approach by using trait objects instead of inheritance.
 
-##### Defining a common behaviour using trait
+#### Defining a common behaviour using trait
 
 - A `trait` object points to both:
 
@@ -5327,6 +5327,52 @@ Note: People think "polymorphism is synonymous with inheritance". But it is a mo
 | Compiler writes some new code for various concrete types.      | At runtime, it is decided whether a selected type can follow the requirements. |
 | When we use trait bounds on generics, static dispatch happens. | When we want to perform dynamic dispatch, we can use the `dyn` keyword.        |
 | No runtime cost is added.                                      | Some runtime cost is added.                                                    |
+
+#### The State Pattern
+
+- The _state pattern_ is an object-oriented design pattern.
+- The current state is stored inside the struct, along with it's value(s).
+
+  ```rust
+  pub struct Post {
+      // Box and dyn are used because the state variable
+      // will have different states during the life of Post
+      state: Option<Box<dyn State>>,
+      content: String,
+  }
+  ```
+
+- There are _state objects_, you can create a new object by implementing this trait.
+
+  ```rust
+  trait State {
+      // The first two functions, results in transitions to different states.
+      fn request_review(self: Box<Self>) -> Box<dyn State>;
+      fn approve(self: Box<Self>) -> Box<dyn State>;
+      // This function, can be called on any state object,
+      // similar to the above two functions, except instead
+      // of causing a state transition, it will return value
+      // as if we conditionally returned output for each state
+      fn content<'a>(&self, _post: &'a Post) -> &'a str {
+          ""
+      }
+  }
+  ```
+
+  - The state pattern is built such that, methods defined on _state objects_ will cause changes in the `Post`, but the methods defined on `Post` will have no idea what these changes will look like. Hence, _state objects_ will encapsulate behaviour changes from the main _struct_.
+
+  - You can look at it's complete implementation over [here](https://gist.github.com/utkarshg6/642859eef3d79fde55eeafb6cb4ed520).
+  - Some downsides of State Pattern:
+
+    - Extra Modifications: If we add a new state, we'll need to modify other states too. It's due to the reason that one state can only make transitions to another state.
+    - Code Duplication: It leads us to write common code inside state objects, as we cannot write directly in trait's default implementation because traits don't know about the concrete type.
+
+  - There's another implementation of state pattern in Rust. It doesn't follow the classic OOP pattern, as we'll require to store the object in new variable, whenever a state transition will happen. Here's the [code](https://gist.github.com/utkarshg6/507560be53345b20aca8304f477fa0b0).
+
+    ```rust
+    // This will cause a state transition from PendingReview to Published
+    let post = post.approve();
+    ```
 
 ## OOPS
 
