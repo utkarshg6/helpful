@@ -5374,6 +5374,115 @@ Note: People think "polymorphism is synonymous with inheritance". But it is a mo
     let post = post.approve();
     ```
 
+### Pattern Matching
+
+- `match` Arms
+
+  ```rust
+  match VALUE {
+      PATTERN => EXPRESSION,
+      PATTERN => EXPRESSION,
+      PATTERN => EXPRESSION,
+  }
+  ```
+
+- Conditional `if let` statements
+
+  ```rust
+  fn main() {
+      let favorite_color: Option<&str> = None;
+      let is_tuesday = false;
+      let age: Result<u8, _> = "34".parse();
+
+      if let Some(color) = favorite_color {
+          println!("Using your favorite color, {}, as the background", color);
+      } else if is_tuesday {
+          println!("Tuesday is green day!");
+      } else if let Ok(age) = age {
+          if age > 30 {
+              println!("Using purple as the background color");
+          } else {
+              println!("Using orange as the background color");
+          }
+      } else {
+          println!("Using blue as the background color");
+      }
+  }
+  ```
+
+- `while let` loops
+
+  ```rust
+      let mut stack = Vec::new();
+
+      stack.push(1);
+      stack.push(2);
+      stack.push(3);
+
+      while let Some(top) = stack.pop() {
+          println!("{}", top);
+      }
+  ```
+
+- `for` loops
+
+  ```rust
+      let v = vec!['a', 'b', 'c'];
+
+      for (index, value) in v.iter().enumerate() {
+          println!("{} is at index {}", value, index);
+      }
+  ```
+
+- `let` statements
+
+  ```rust
+      let (x, y, z) = (1, 2, 3);
+  ```
+
+- function parameters
+
+  ```rust
+  fn print_coordinates(&(x, y): &(i32, i32)) {
+      println!("Current location: ({}, {})", x, y);
+  }
+
+  fn main() {
+      let point = (3, 5);
+      print_coordinates(&point);
+  }
+  ```
+
+#### Forms of Pattern
+
+| Refutable                                                                                                                                | Irrefutable                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Patterns that can fail to match for some possible value.                                                                                 | Patterns that'll match for any possible value.                                                                                                                          |
+| For Example, in `if let Some(x) = a_value`, the `Some(x)` can fail to match if `a_value` is `None`.                                      | For Example, in `let x = 5;`, the `x` matches anything and therefore cannot fail to match.                                                                              |
+| The `if let` and `while let` expressions accept refutable and irrefutable patterns, but the compiler warns against irrefutable patterns. | Function parameters, `let` statements, and `for` loops can only accept irrefutable patterns, because the program cannot do anything meaningful when values don’t match. |
+
+- Using a refutable pattern where Rust requires an irrefutable pattern:
+
+  ```rust
+  // FAIL: The code doesn't know what to do with a None value
+  // Some(x) is a refutable pattern
+  // let requires an irrefutable pattern
+  let Some(x) = some_option_value;
+  ```
+
+- Using irrefutable pattern where Rust requires a refutable pattern:
+
+```rust
+// WARN: It doesn’t make sense to use if let with an irrefutable pattern
+// x is an irrefutable pattern
+// if let is a refutable pattern
+if let x = 5 {
+    println!("{}", x);
+};
+```
+
+- In `match` statements, all arms use refutable pattern except the last one that uses `_`, which uses irrefutable pattern.
+
 ## OOPS
 
 ### Instance
