@@ -5738,6 +5738,61 @@ Note: Ignoring a function parameter can be especially useful in some cases, for 
   }
   ```
 
+##### Match Guard
+
+- _Match Guard_ is an additional `if` condition specified after the pattern in a match arm that must also match along with the pattern matching, _for that arm to be chosen_.
+
+  ```rust
+      let num = Some(4);
+
+      match num {
+          Some(x) if x % 2 == 0 => println!("The number {} is even", x),
+          Some(x) => println!("The number {} is odd", x),
+          None => (),
+      }
+  ```
+
+- The downside of this additional expressiveness is that the compiler doesn't try to check for exhaustiveness when match guard expressions are involved.
+- Using Match Guard with `|` operator
+
+  ```rust
+      let x = 4;
+      let y = false;
+
+      match x {
+          // It works like this => (4 | 5 | 6) if y => ...
+          // And not like this => 4 | 5 | (6 if y) => ...
+          4 | 5 | 6 if y => println!("yes"),
+          _ => println!("no"),
+      }
+
+      // Output =>
+      // no
+  ```
+
+- `@` Bindings
+
+  ```rust
+  // The at operator (@) lets us create a variable that holds a value at the same time
+  // we’re testing that value to see whether it matches a pattern.
+
+  enum Message {
+      Hello { id: i32 },
+  }
+
+  let msg = Message::Hello { id: 5 };
+
+  match msg {
+      Message::Hello {
+          id: id_variable @ 3..=7,
+      } => println!("Found an id in range: {}", id_variable), // Value of "id" is stored in "id_variable", hence it was knwon here
+      Message::Hello { id: 10..=12 } => {
+          println!("Found an id in another range") // Range was specified, Value of "id" is not stored inside any variable, hence it is unknown here
+      }
+      Message::Hello { id } => println!("Found some other id: {}", id), // Range was not specified, Value of "id" is stored inside "id", hence it was known here
+  }
+  ```
+
 ## OOPS
 
 ### Instance
