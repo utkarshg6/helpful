@@ -1184,7 +1184,7 @@ fn calculate_length(s: String) -> (String, usize) {
   }
   ```
 
-## Concepts
+## Basic Concepts
 
 ### Structs
 
@@ -3886,7 +3886,7 @@ where
   let weight: f32 = input.trim().parse().unwrap();
   ```
 
-## Advanced Concepts
+## Medium Concepts
 
 ### Functional Language Features
 
@@ -5792,6 +5792,87 @@ Note: Ignoring a function parameter can be especially useful in some cases, for 
       Message::Hello { id } => println!("Found some other id: {}", id), // Range was not specified, Value of "id" is stored inside "id", hence it was known here
   }
   ```
+
+## Advanced Features
+
+### Unsafe Rust
+
+_Rust has a second language hidden inside it that doesn’t enforce the memory safety guarantees: it’s called **unsafe Rust** and works just like regular Rust, but gives us extra superpowers._
+
+- Why it exists?
+
+  - It’s better for Rust to reject some valid programs rather than accept some invalid programs.
+  - That makes the static analysis of the Rust compiler conservative.
+  - Although the code might be okay, if the Rust compiler doesn’t have enough information to be confident, it will reject the code.
+  - In these cases, you can use unsafe code to tell the compiler, “Trust me, I know what I’m doing.”
+  - Another reason Rust has an unsafe alter ego is that the underlying computer hardware is inherently unsafe. Hence, it'll allow you to write low-level systems code, such as directly interacting with the OS, or even write your own OS.
+
+- Any Downsides?
+
+  - Use it at your own risk.
+  - Problems due to memory unsafety, such as null pointer dereferencing, can occur.
+
+- Answers to some common misconceptions:
+
+  - It’s important to understand that `unsafe` doesn’t turn off the borrow checker or disable any other of Rust’s safety checks: if you use a reference in unsafe code, it will still be checked.
+  - Hence, you'll get only the above mentioned features along with some safety.
+  - Also, it does not necessarily mean that code inside `unsafe` is necessarily dangerous or that it will definitely have memory safety problems.
+  - It is programmer's responsibilty to ensure that the code is memory safe.
+
+- How to write code safely using `unsafe`?
+
+  - Keep unsafe blocks small and it'll be easier to investigate the memory bugs.
+  - You can also wrap unsafe code in a safe abstraction. It prevents the uses of unsafe from leaking out in all the other places.
+
+- What Superpowers can I get?
+  - Dereference a raw pointer
+  - Call an unsafe function or method
+  - Access or modify a mutable static variable
+  - Implement an unsafe trait
+  - Access fields of `union`s
+
+#### Dereferencing a Raw Pointer
+
+- Raw Pointers are meant for unsafe rust and are similar to references. They are of two types:
+  - `*const T`: Immutable Raw Pointer
+  - `*mut T`: Mutable Raw Pointer
+- Here `*` is not a dereference operator but a part of the type name.
+- Unlike references and Smart Pointers, they break the following rules of Rust's safety:
+  - They are allowed to ignore the borrowing rules by having both immutable and mutable pointers or multiple mutable pointers to the same location
+  - Aren’t guaranteed to point to valid memory
+  - Are allowed to be null
+  - Don’t implement any automatic cleanup
+- This is how you can create raw pointers out of a variable.
+
+  ```rust
+  let mut num = 5;
+
+  let r1 = &num as *const i32;
+  let r2 = &mut num as *mut i32;
+  ```
+
+- We can create raw pointers in safe code; we just can’t dereference raw pointers outside an unsafe block.
+
+  ```rust
+  let mut num = 5;
+
+  // Notice it's possible to create raw pointers inside safe code
+  let r1 = &num as *const i32;
+  let r2 = &mut num as *mut i32;
+
+  // But to dereference a raw pointer you'll require an unsafe block
+  unsafe {
+      println!("r1 is: {}", *r1);
+      println!("r2 is: {}", *r2);
+  }
+  ```
+
+- We broke the Rust's safety measures, as we are able to use a mutable and immutable reference to a value. Now, as a programmer we made sure that these references are used properly inside the `unsafe` block.
+
+- Uses of creating raw pointers:
+  - Mostly used when interfacing with C code.
+  - Calling an Unsafe Function or Method.
+  - Building safe abstractions over unsafe code.
 
 ## OOPS
 
