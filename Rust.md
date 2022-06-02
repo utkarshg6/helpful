@@ -6602,6 +6602,50 @@ Fun Fact: Thunk is a word for code to be evaluated at a later time, so it’s an
 
 - In case you want to understand better how you can use traits with dynamic dispatch, you can check [here](#defining-a-common-behaviour-using-trait).
 
+### Macros
+
+- Rust code that writes more rust code are called _Macros_. This kind of programming is called metaprogramming.
+- Here are the following things that you can only do with macros and not functions:
+
+  - Macros can take variable number of parameters, unlike functions. You can call `println!("hello")` with one argument or `println!("hello {}", name)` with two arguments.
+  - Macros are expanded before the compiler interprets the meaning of the code. For example, macros can implement a trait on a given type. Functions can't because it gets called at runtime and a trait needs to be implemented at compile time.
+
+- Drawbacks of Macros:
+  - It's hard to read, write and maintain.
+  - You can define functions anywhere, but you need to bring the macros in scope before you can call them.
+
+#### Declarative Macros
+
+- They are the most widely used types of macros.
+- Also referred to as "macros by example", “`macro_rules!` macros,” or just plain “macros.”
+- They are similar to `match` statements, except they match on literal rust code, instead of some value.
+- This is how the `vec!` macro is defined. It is a simplified version, and the implementation of standard library has some extra code for preallocating memory for different types.
+
+```rust
+#[macro_export]
+macro_rules! vec {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push($x);
+            )*
+            temp_vec
+        }
+    };
+}
+```
+
+- Explanation:
+  - `#[macro_export]` - You can't export the macro without this line. For using this macro, you'll have to bring the crate into scope where this macro is defined.
+  - `macro_rules! name-of-macro` - Then we declare the macro with the `macro_rules!` along with the name of the macro without the exclamation mark. In our case, `vec`.
+  - `( $( $x:expr ),* ) =>` - This is the match arm of the macro. In our case, the macro has only one match arm, if such an expression is passed to the macro which doesn't fall into it, it'll fail. Some complex macros will have multiple match arms.
+    - `( ) =>` - A parantheses surrounds the whole pattern. It indicates that this is a match arm.
+    - `$( )` - Anything inside this parantheses will capture values.
+    - `$x: expr` - This matches any Rust expression and gives the expression the name `$x`.
+    - `,` - It means that the literal `,` might appear after the code that matches the code in `$()`.
+    - `*` - It means that the pattern matches zero or more of whatever precedes the `*`.
+
 ## OOPS
 
 ### Instance
