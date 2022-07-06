@@ -6675,6 +6675,15 @@ Note: This vector that we created over here can take any number of arguments of 
   - Attribute Like
   - Function Like
 
+##### Custom Derive Macros
+
+- Using custom derive macros looks like this (it is used over structs or enums):
+
+  ```rust
+  #[derive(HelloMacro)]
+  struct Pancakes;
+  ```
+
 - Defining proceudral macros looks like this:
 
   ```rust
@@ -6838,6 +6847,55 @@ Note: This vector that we created over here can take any number of arguments of 
     hello_macro = { path = "../hello_macro" }
     hello_macro_derive = { path = "../hello_macro/hello_macro_derive" }
     ```
+
+##### Attribute Like Macros
+
+- In Custom Derive Macros, the `derive` keyword is used and it generates some new code for the struct or enum.
+- Instead of generating new code, Attribute like macros allow you to create new attributes.
+- Unlike Custom Derive Macros, Attribute like macros are not limited to just structs or enums and can be applied to other items, such as functions.
+- Here's an example of how it can be used on a function:
+
+  ```rust
+  #[route(GET, "/")]
+  fn index() {
+    ..
+  }
+  ```
+
+- This `#[route]` attribute would be defined by the framework as a procedural macro. The signature of the macro definition function would look like this:
+
+  ```rust
+  #[proc_macro_attribute]
+  pub fn route(attr: TokenStream, item: TokenStream) -> TokenStream {
+    // attr: The GET, "/" will get stored in this argument
+    // item: The code attached to above macro (fn index() {} in our case) will get stored in this argument
+    ..
+  }
+  ```
+
+- Other than that, attribute-like macros work the same way as custom derive macros: you create a crate with the `proc-macro` crate type and implement a function that generates the code you want!
+
+##### Function Like Macros
+
+- These macros look like function calls but with a `!`.
+- They're more flexible than functions as they can accept variable number of arguments.
+- In declarative macros (`macro_rules !` macro) uses match-like syntax, the Function Like Macros take a `TokenStream` parameter, similar to the other two procedural macros.
+- Here's an example, here we want to parse SQL code:
+
+  ```rust
+  let sql = sql!(SELECT * FROM posts WHERE id=1);
+  ```
+
+- If we tried to build this macro with the `macro_rules !` macro, then match-like pattern would've made it hard to implement. With using `TokenStream` it is a bit easier to implement:
+
+  ```rust
+  #[proc_macro]
+  pub fn sql(input: TokenStream) -> TokenStream {
+    ..
+  }
+  ```
+
+- It's implementation is closer to that of custom derive macros.
 
 ## OOPS
 
