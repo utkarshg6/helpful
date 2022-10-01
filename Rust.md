@@ -8231,6 +8231,13 @@ For Windows:
   rustup toolchain install nightly-x86_64-unknown-linux-gnu
   ```
 
+- Use nightly on a specific project (after this all the `rustc` and `cargo` commands will use nightly):
+
+  ```zsh
+  cd ~/projects/needs-nightly
+  rustup override set nightly
+  ```
+
 ### Conventions in Rust
 
 - Rust code uses _snake case_ as the conventional style for function and variable names, in which all letters are lowercase and underscores separate words.
@@ -8393,6 +8400,24 @@ For Windows:
 
   ```zsh
   cargo --list
+  ```
+
+- To automatically format code:
+
+  ```zsh
+  cargo fmt
+  ```
+
+- To automatically fix warnings (fixable by compiler):
+
+  ```zsh
+  cargo fix
+  ```
+
+- To Lint your code:
+
+  ```zsh
+  cargo clippy
   ```
 
 #### The `opt-level`
