@@ -6974,6 +6974,31 @@ fn main() {
 - When derived on structs and enums, `cmp` behaves the same way as the derived implementation for `partial_cmp` does with `PartialOrd`.
 - An example of when Ord is required is when storing values in a `BTreeSet<T>`, a data structure that stores data based on the sort order of the values.
 
+##### `Clone`
+
+- It allows you to perform a deep copy (copying the data on heap) of a value.
+- When you derive clone on a type, then it is required that the type's fields must also derive the clone.
+
+##### `Copy`
+
+- It allows you to copy data on the stack.
+- Copying is a lot faster than cloning but it's undesirable for large items. For Example, String.
+- A type that implements copy must also implement clone. It is trivial because Clone performs the same task as Copy.
+
+##### `Hash`
+
+- It allows you to take an _instance of a type_ of arbitrary size and map that instance to a _value of fixed size_ using a hash function.
+- It is required in storing keys in a `HashMap<K, V>` to store data efficiently.
+- If a type implements this trait then it's required that all of it fields must also implement this trait.
+
+##### `Default`
+
+- It allows you to create a default value of a type.
+- The `Default::default` function is commonly used in combination with the struct update syntax.
+- You can customize a few fields of a struct and then set and use a default value for the rest of the fields by using `..Default::default()`.
+- You can use the method `unwrap_or_default()` on `Option<T>` instances.
+- For Example, If the `Option<T>` is `None`, the method `unwrap_or_default` will return the result of `Default::default` for the type `T` stored in the `Option<T>`.
+
 ## OOPS
 
 ### Instance
