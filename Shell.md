@@ -16,6 +16,21 @@
     cat input.txt | pbcopy
     ```
 
+- Calculate the number of lines of an ouput:
+
+  - Definition:
+
+    ```bash
+    # you can pipe the output to word count with the -l flag for number of lines
+    {some-command} | wc -l
+    ```
+
+  - Usage:
+
+    ```bash
+    grep "user" logfile0001.log | wc -l
+    ```
+
 ## Grep
 
 - Print search results:
