@@ -38,13 +38,27 @@
   - Definition:
 
     ```bash
+    # Method 0: Searching for a string inside a file
     grep {search-string} {filename}
+
+    # Method 1: Pass all the file names
+    grep {search-string} {filename1} {filename2}
+      
+    # Method 2: You may use a double dash with no name, it means no more flags can be defined
+    grep {search-string} -- {filename1} {filename2}
     ```
 
   - Example:
 
     ```bash
+    # Method 0
     grep username logfile0001.log
+
+    # Method 1
+    grep username logfile0001.log logfile0002.log
+
+    # Method 2
+    grep username -- logfile0001.log logfile0002.log
     ```
 
 - Copy the contents to a file:
@@ -61,28 +75,28 @@
     grep username logfile0001.log >searched_logs.log
     ```
 
-- Search in multiple files:
+- Using the regex for digits in grep:
 
-    - Definition:
+  - Definition:
 
+    ```bash
+    # Method 0: You'll have to use the -E flag to activate advanced regex and then use the \d+ identifier
+    grep -E "some string \d+" {filename}
 
-      ```bash
-      # Method 1: Pass all the file names
-      grep {search-string} {filename1} {filename2}
-      
-      # Method 2: You may use a double dash with no name, it means no more flags can be defined
-      grep {search-string} -- {filename1} {filename2}
-      ```
+    # Method 2: Invoke egrep instead of grep
+    egrep "some string \d+" {filename}
+    ```
 
-  - Example:
+  - Usage:
 
-      ```bash
-      # Method 1
-      grep username logfile0001.log logfile0002.log
+    ```bash
+    # Method 0
+    grep -E "Writing \d+ lines to the console." logfile0001.log
+    
+    # Method 1
+    egrep "Writing \d+ lines to the console." logfile0001.log
+    ```
 
-      # Method 2
-      grep username -- logfile0001.log logfile0002.log
-      ```
 
 ## Sed
 
