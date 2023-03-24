@@ -124,6 +124,28 @@
     sed -i 's/hello/world/g' file.txt
     ```
 
+- Replace the contents of `[]` to something else:
+
+  - Definition:
+
+    ```bash
+    # For anything inside the brackets we can use: \[.*\]
+
+    # Content that should be allowed inside brackets:
+    #   Match anything that's not a closing bracket: ^]
+    #   It may appear 0 or more times: [^]]*
+    
+    # So the find pattern will be: \[[^]]*\] 
+    sed -i "s/\[[^]]*\]/$key/g" {filename}
+    ```
+
+  - Usage:
+
+    ```bash
+    # As an example it'll replace [23, 48, 51] to [...]
+    sed -i "s/\[[^]]*\]/[...]/g" {filename}
+    ```
+
 
 ## NVM
 
