@@ -179,4 +179,20 @@
   nvm use default
   ```
 
+## Regex
+
+- Special characters in regex that needs to be escaped `{ } [ ] / \ + * . $^ | ?` using the `\`.
+
+- These type of characters are accepted for `\w` => `a`, `A`, `1`, `_`
   
+- These type of characters are accepted for `\d` => `1`
+
+- These type of characters are accepted for `\s` => whitespace
+
+- Regex sees all text as one line. But we use the multiline flag to handle each line separately.
+
+- Regex does a greedy match by default. This means that the matchmaking will be as long as possible. If you'll use `.*r`, it'll match the whole line `ber beer beeer beeeer`.
+
+
+
+
