@@ -2,6 +2,20 @@
 
 ## Basics
 
+- Unzip:
+
+  - Definition:
+
+    ```bash
+    unzip {filename}
+    ```
+
+  - Example:
+
+    ```bash
+    unzip logfile.zip
+    ```
+
 - Copy the output of a command to clipboard (only for macos):
 
   - Definition:
