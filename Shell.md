@@ -191,8 +191,4 @@
 
 - Regex sees all text as one line. But we use the multiline flag to handle each line separately.
 
-- Regex does a greedy match by default. This means that the matchmaking will be as long as possible. If you'll use `.*r`, it'll match the whole line `ber beer beeer beeeer`.
-
-
-
-
+- Regex does a greedy match by default. This means that the matchmaking will be as long as possible. If you'll use `.*r`, it'll match the whole line `ber beer beeer beeeer`. Although, if you'll use `?` like this `.*?r` then it'll match `ber`.
