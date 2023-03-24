@@ -82,14 +82,17 @@
   - Example:
 
     ```bash
-    # Method 0: to replace all occurrences of ‘hello’ to ‘world’ in the file input.txt and print the changes
+    # Method 0: to replace _first_ occurrence of ‘hello’ to ‘world’ in the file input.txt and print the changes
     sed 's/hello/world/' input.txt
 
-    # Method 1: to replace all occurrences of ‘hello’ to ‘world’ in the file input.txt to output.txt
-    sed 's/hello/world/' input.txt > output.txt
+    # Method 1: to replace _all_ occurences, you'll have to specify the g flag at the end of the script
+    sed 's/hello/world/g' input.txt
 
-    # Method 2: To edit files in place 
-    sed -i 's/hello/world/' file.txt
+    # Method 2: To paste modified changes of input.txt to output.txt
+    sed 's/hello/world/g' input.txt > output.txt
+
+    # Method 3: To edit files in place 
+    sed -i 's/hello/world/g' file.txt
     ```
 
 
