@@ -124,6 +124,24 @@
     sed -i 's/hello/world/g' file.txt
     ```
 
+- Creating and using a sed script:
+
+  - Creating the script:
+
+    ```bash
+    echo 's/hello/world/' > myscript.sed
+    ```
+
+  - Passing the script through sed:
+
+    ```bash
+    # Method 1
+    sed -f myscript.sed input.txt > output.txt
+
+    # Method 2
+    sed --file=myscript.sed input.txt > output.txt
+    ```
+
 - Replace the contents of `[]` to something else:
 
   - Definition:
