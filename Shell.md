@@ -60,12 +60,15 @@
   - Definition:
 
     ```bash
-    sed {SCRIPT} {INPUTFILE}
+    sed {script} {filename}
     ```
 
   - Example:
 
     ```bash
+    # Method 0: to replace all occurrences of ‘hello’ to ‘world’ in the file input.txt and print the changes
+    sed 's/hello/world/' input.txt
+
     # Method 1: to replace all occurrences of ‘hello’ to ‘world’ in the file input.txt to output.txt
     sed 's/hello/world/' input.txt > output.txt
 
