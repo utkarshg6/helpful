@@ -80,7 +80,7 @@
   - Definition:
 
     ```bash
-    # Method 0: You'll have to use the -E flag to activate advanced regex and then use the \d+ identifier
+    # Method 0: You'll have to use the -E flag to activate extended regex and then use the \d+ identifier
     grep -E "some string \d+" {filename}
 
     # Method 2: Invoke egrep instead of grep
