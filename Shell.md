@@ -1,5 +1,21 @@
 # Shell
 
+## Basics
+
+- Copy the output of a command to clipboard (only for macos):
+
+  - Definition:
+
+    ```bash
+    {command-with-output} | pbcopy
+    ```
+
+  - Example:
+
+    ```bash
+    cat input.txt | pbcopy
+    ```
+
 ## Grep
 
 - Print search results:
