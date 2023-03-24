@@ -53,6 +53,26 @@
       grep username -- logfile0001.log logfile0002.log
       ```
 
+## Sed
+
+- Normally sed is invoked like this:
+
+  - Definition:
+
+    ```bash
+    sed {SCRIPT} {INPUTFILE}
+    ```
+
+  - Example:
+
+    ```bash
+    # Method 1: to replace all occurrences of ‘hello’ to ‘world’ in the file input.txt to output.txt
+    sed 's/hello/world/' input.txt > output.txt
+
+    # Method 2: To edit files in place 
+    sed -i 's/hello/world/' file.txt
+    ```
+
 
 ## NVM
 
