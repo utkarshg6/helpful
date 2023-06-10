@@ -126,3 +126,42 @@ Here's a wrap up:
                             └─────────┘                 └─────────┘
 
 ```
+
+Stage 3 - Processing Macros from AST
+
+- After the AST is constructed, the macros are porocessed.
+- The following syntax extensions are used for processing macros:
+
+  | Syntax                | Type                     | Example                                               |
+  | --------------------- | ------------------------ | ----------------------------------------------------- |
+  | `#[ $arg ]`           | Attributes               | `#[derive(Clone)]`, `#[no_mangle]`, ...               |
+  | `#![ $arg ]`          | Attributes               | `#![allow(dead_code)]`, `#![crate_name="blang"]`, ... |
+  | `$name ! $arg`        | Function Like Macro      | `println!("Hi!")`, `concat!("a", "b")`, ...           |
+  | `$name ! $arg0 $arg1` | Used to construct macros | `macro_rules! dummy { () => {}; }`                    |
+
+- The first two are attributes, which annotate items, expressions and statements. They are divided into:
+
+  | Attribute Type              | Implemented By   | Example                                                           |
+  | --------------------------- | ---------------- | ----------------------------------------------------------------- |
+  | Built-in Attributes         | Compiler         | `#[test]`, `#[ignore]`, `#[cfg]`, `#![allow(clippy::filter_map)]` |
+  | Procedural Macro Attributes | Procedural Macro | `#[MyProceduralMacro]`                                            |
+  | Derive Attributes           | Procedural Macro | `#[derive(Clone)]`                                                |
+
+- To differentiate between the third and the fourth type, Rust looks for brackets `(...)`, `[...]`, or `{...}`.
+- For example, if it's `println!(...)`, `vec![...]` or `lazy_static! {...}`, it's of the third type.
+- If it's like this `macro_rules! dummy { () => {}; }`, then it's of the fourth type.
+- At this point, Rust doesn't cares what's inside the brackets, it can even allow invalid Rust code.
+- These Syntax Extension can appear in place of:
+
+  | Item                         | Allowed |
+  | ---------------------------- | ------- |
+  | Patterns                     | ✓       |
+  | Statements                   | ✓       |
+  | Expressions                  | ✓       |
+  | Items (including impl items) | ✓       |
+  | Types                        | ✓       |
+  | Identifiers                  | ✗       |
+  | Match arms                   | ✗       |
+  | Struct fields                | ✗       |
+
+- In conclusion, Syntax extensions are parsed as part of the abstract syntax tree.
