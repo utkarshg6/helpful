@@ -7,7 +7,7 @@
 
 Let's understand how Rust source is processed by the compiler?
 
-Stage 1 : Tokenization
+### Stage 1 : Tokenization
 
 - In this stage, the source text is converted into _tokens_.
 - Tokens are equivalent to "words" in a written text.
@@ -37,7 +37,7 @@ Stage 1 : Tokenization
 
 - Rust does it differently, it doesn't have a macro layer at this stage.
 
-Stage 1.5: Token Trees
+### Stage 1.5 : Token Trees
 
 - Consider this stream of Tokens:
 
@@ -58,7 +58,7 @@ Stage 1.5: Token Trees
 
 - You can call smaller entities as leaves which are branching out from a tree.
 
-Stage 2: Parsing
+### Stage 2 : Parsing
 
 - In this stage the stream of tokens is converted into [Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree).
 - For example, the token stream `1 + 2` gets transformed into this tree:
@@ -127,7 +127,7 @@ Here's a wrap up:
 
 ```
 
-Stage 3 - Processing Macros from AST
+### Stage 3 : Processing Macros from AST
 
 - After the AST is constructed, the macros are porocessed.
 - The following syntax extensions are used for processing macros:
@@ -165,3 +165,88 @@ Stage 3 - Processing Macros from AST
   | Struct fields                | ✗       |
 
 - In conclusion, Syntax extensions are parsed as part of the abstract syntax tree.
+
+### Stage 4 : Expansion
+
+- This stage involves traversing the AST, locating syntax extension invocations and replacing them with their expansion.
+- After the syntax extensions are expanded inside the AST, the compiler will start constructing it's semantic understanding of the program.
+- A sytax extension can be expanded into:
+  - an expression,
+  - a pattern,
+  - a type,
+  - zero or more items, or
+  - zero or more statements.
+- Here's an example how the invocation will work inside AST:
+
+  - Consider this:
+
+    ```rust
+    let eight = 2 * four!();
+    ```
+
+  - Here's the partial AST:
+
+    ```
+    ┌─────────────┐
+    │ Let         │
+    │ name: eight │   ┌─────────┐
+    │ init: ◌     │╶─╴│ BinOp   │
+    └─────────────┘   │ op: Mul │
+                    ┌╴│ lhs: ◌  │
+         ┌────────┐ │ │ rhs: ◌  │╶┐ ┌────────────┐
+         │ LitInt │╶┘ └─────────┘ └╴│ Macro      │
+         │ val: 2 │                 │ name: four │
+         └────────┘                 │ body: ()   │
+                                    └────────────┘
+
+    ```
+
+  - Let's assume `four!()` is expanded into `1 + 3`. So, this is how the final AST will look like:
+
+    ```
+    ┌─────────────┐
+    │ Let         │
+    │ name: eight │   ┌─────────┐
+    │ init: ◌     │╶─╴│ BinOp   │
+    └─────────────┘   │ op: Mul │
+                    ┌╴│ lhs: ◌  │
+         ┌────────┐ │ │ rhs: ◌  │╶┐ ┌─────────┐
+         │ LitInt │╶┘ └─────────┘ └╴│ BinOp   │
+         │ val: 2 │                 │ op: Add │
+         └────────┘               ┌╴│ lhs: ◌  │
+                       ┌────────┐ │ │ rhs: ◌  │╶┐ ┌────────┐
+                       │ LitInt │╶┘ └─────────┘ └╴│ LitInt │
+                       │ val: 1 │                 │ val: 3 │
+                       └────────┘                 └────────┘
+    ```
+
+- Every expression that's expanded from a macro is a complete AST Node. In other words, the expression will be surrounded by paranthesis.
+
+  ```rust
+  let eight = 2 * (1 + 3);
+  ```
+
+- There are important implications of the fact that a macro is expanded into a complete Node:
+
+  - A macro can only expand to the kind of AST node the parser expects at that position.
+  - As a consequence of the above, a macro cannot expand to incomplete or syntactically invalid constructs.
+
+- Another takeaway is that, the expansion occurs, as many an AST requires upto the recursion depth of `128`:
+
+  - Consider this:
+
+    ```rust
+    let x = four!();
+    ```
+
+  - This is expanded into:
+
+    ```rust
+    let x = 1 + three!();
+    ```
+
+  - This can be further expanded into:
+
+    ```rust
+    let x = 1 + 3;
+    ```
