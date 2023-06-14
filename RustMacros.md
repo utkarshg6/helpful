@@ -250,3 +250,24 @@ Here's a wrap up:
     ```rust
     let x = 1 + 3;
     ```
+
+### Stage 5 : Hygiene
+
+- The ability for a macro to be invocable anywhere, neither affecting nor being affected by its surroundings.
+- The idea is to avoid writing syntax extensions that aren't fully hygienic.
+- If an identifier used in a syntax extension _cannot_ reference something defined outside of a syntax extension it is considered hygienic.
+- Here's an example of some unhygienic macros:
+
+  - The surrounding code uses the identifier of invoked macro:
+
+    ```rust
+    make_local!(); // Let's assume it expands to `let local = 0`
+    assert_eq!(local, 0); // The local from the macro used by the assert_eq!
+    ```
+
+  - Macro using the identifier of the surrounding code:
+
+    ```rust
+    let mut local = 0; // This shouldn't be mutated by a macro
+    use_local!(); // Macro expands into `local = 42`, hence affecting the surrounding
+    ```
